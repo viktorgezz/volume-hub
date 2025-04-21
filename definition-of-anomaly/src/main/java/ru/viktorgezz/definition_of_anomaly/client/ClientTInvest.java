@@ -14,7 +14,6 @@ import org.springframework.web.client.RestTemplate;
 import ru.viktorgezz.definition_of_anomaly.dto.CandleDto;
 
 import java.util.Arrays;
-import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
@@ -23,6 +22,11 @@ import java.util.Objects;
 public class ClientTInvest implements ClientInvest {
 
     private static final Logger log = LoggerFactory.getLogger(ClientTInvest.class);
+
+    private static final String REQUEST_ERROR_STATUS = "Ошибка при запросе: статус {}";
+    private static final String REQUEST_EXECUTION_ERROR = "Ошибка при выполнении запроса: {}";
+    private static final String ERROR_RECEIVING_STOCK_OBJECTS = "Ошибка при принятие объектов акций";
+    private static final String ERROR_RECEIVING_FIGI = "Ошибка при принятие всех figi";
 
     private final String API_SERVICE_VOLUME;
 
@@ -37,25 +41,15 @@ public class ClientTInvest implements ClientInvest {
     }
 
     public Map<String, List<CandleDto>> fetchMinuteCandlesForLastDay() {
-        try {
-            ResponseEntity<Map<String, List<CandleDto>>> response = rT.exchange(
-                    String.format("%s/candle/minute/for-last-day", API_SERVICE_VOLUME),
-                    HttpMethod.GET,
-                    null,
-                    new ParameterizedTypeReference<Map<String, List<CandleDto>>>() {
-                    }
-            );
-
-            if (response.getStatusCode().is2xxSuccessful()) {
-                return response.getBody();
-            } else {
-                log.error("Ошибка при запросе: статус {}", response.getStatusCode());
-                return Collections.emptyMap();
-            }
-        } catch (Exception e) {
-            log.error("Ошибка при выполнении запроса: {}", e.getMessage());
-            return Collections.emptyMap();
-        }
+        return extractResponseBodyOrThrow(rT
+                .exchange(
+                        String.format("%s/candle/minute/for-last-day", API_SERVICE_VOLUME),
+                        HttpMethod.GET,
+                        null,
+                        new ParameterizedTypeReference<Map<String, List<CandleDto>>>() {
+                        }
+                )
+        );
     }
 
     public String fetchNameCompanyByFigi(String figi) {
@@ -66,24 +60,15 @@ public class ClientTInvest implements ClientInvest {
     }
 
     public CandleDto fetchDayCandleCurrDay(String figi) {
-        try {
-            ResponseEntity<CandleDto> response =  rT.exchange(
-                    String.format("%s/candle/day/%s", API_SERVICE_VOLUME, figi),
-                    HttpMethod.GET,
-                    null,
-                    new ParameterizedTypeReference<CandleDto>() {
-                    }
-            );
-            if (response.getStatusCode().is2xxSuccessful()) {
-                return response.getBody();
-            } else {
-                log.error("Ошибка при запросе: статус {}", response.getStatusCode());
-                throw new RuntimeException();
-            }
-        } catch (RestClientException e) {
-            log.error("Ошибка при выполнении запроса: {}", e.getMessage());
-            throw new RuntimeException(e.getMessage());
-        }
+        return extractResponseBodyOrThrow(rT
+                .exchange(
+                        String.format("%s/candle/day/%s", API_SERVICE_VOLUME, figi),
+                        HttpMethod.GET,
+                        null,
+                        new ParameterizedTypeReference<CandleDto>() {
+                        }
+                )
+        );
     }
 
     public String fetchTickerCompanyByFigi(String figi) {
@@ -104,7 +89,7 @@ public class ClientTInvest implements ClientInvest {
                     )
             );
         } catch (NullPointerException e) {
-            log.error("Ошибка при принятие объектов акций");
+            log.error(ERROR_RECEIVING_STOCK_OBJECTS);
             return List.of();
         }
     }
@@ -120,8 +105,22 @@ public class ClientTInvest implements ClientInvest {
                     )
             );
         } catch (NullPointerException e) {
-            log.error("Ошибка при принятие объектов figi");
+            log.error(ERROR_RECEIVING_FIGI);
             return List.of();
+        }
+    }
+
+    private <T> T extractResponseBodyOrThrow(ResponseEntity<T> response) {
+        try {
+            if (response.getStatusCode().is2xxSuccessful()) {
+                return response.getBody();
+            } else {
+                log.error(REQUEST_ERROR_STATUS, response.getStatusCode());
+                throw new RuntimeException();
+            }
+        } catch (RestClientException e) {
+            log.error(REQUEST_EXECUTION_ERROR, e.getMessage());
+            throw new RuntimeException(e.getMessage());
         }
     }
 }

@@ -20,7 +20,12 @@ import java.util.Objects;
 public class CandleDao {
 
     private static final Logger log = LoggerFactory.getLogger(CandleDao.class);
+
     private final static String NAME_TABLE_CANDLE = "candle";
+    private static final String DATA_NOT_FOUND_FOR_COMPANY_ID = "Не найдено данных для id_company:: {} {}";
+    private static final String DB_ERROR_CALCULATING_STD_DEV = "Ошибка базы данных при вычислении стандартного отклонения для id_company: {} {}";
+    private static final String FAILED_TO_CALCULATE_STD_DEV_DB_ERROR = "Не удалось рассчитать стандартное отклонение из-за ошибки базы данных";
+    private static final String UNEXPECTED_ERROR_CALCULATING_STD_DEV = "Непредвиденная ошибка при расчете стандартного отклонения";
 
     private final JdbcTemplate jdbcTemplate;
 
@@ -93,13 +98,13 @@ public class CandleDao {
 
             return Objects.requireNonNull(metric);
         } catch (IncorrectResultSizeDataAccessException | NullPointerException e) {
-            log.error("Не найдено данных для id_company:: {} {}", idCompany, e.getMessage());
+            log.error(DATA_NOT_FOUND_FOR_COMPANY_ID, idCompany, e.getMessage());
             return new Metric(BigDecimal.ZERO, BigDecimal.ZERO);
         } catch (DataAccessException e) {
-            log.error("Ошибка базы данных при вычислении стандартного отклонения для id_company: {} {}", idCompany, e.getMessage());
-            throw new RuntimeException("Не удалось рассчитать стандартное отклонение из-за ошибки базы данных", e);
+            log.error(DB_ERROR_CALCULATING_STD_DEV, idCompany, e.getMessage());
+            throw new RuntimeException(FAILED_TO_CALCULATE_STD_DEV_DB_ERROR, e);
         } catch (Exception e) {
-            throw new RuntimeException("Непредвиденная ошибка при расчете стандартного отклонения", e);
+            throw new RuntimeException(UNEXPECTED_ERROR_CALCULATING_STD_DEV, e);
         }
     }
 

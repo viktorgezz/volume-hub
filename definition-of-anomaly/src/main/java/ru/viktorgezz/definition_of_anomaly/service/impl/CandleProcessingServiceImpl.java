@@ -20,6 +20,11 @@ public class CandleProcessingServiceImpl implements CandleProcessingService {
 
     private static final Logger log = LoggerFactory.getLogger(CandleProcessingServiceImpl.class);
 
+    private static final String COMPANY_ADDED_WITH_FIGI_AND_NAME = "figi: {} and name: {} add in Company";
+    private static final String CANDLE_LIST_SIZE_FOR_FIGI = "figi: {}, size list candles: {}";
+    private static final String CANDLES_PROCESSED_FOR_FIGI_COUNT = "Свечи обработаны количество figi: {}";
+    private static final String COMPANY_STATS_SAVED = "Company: {} is add standard deviation: {} and average: {} in table";
+
     private final ClientInvest clientInvest;
     private final CompanyDao companyDao;
     private final CandleDao candleDao;
@@ -47,17 +52,17 @@ public class CandleProcessingServiceImpl implements CandleProcessingService {
                             if (!companyDao.isCompanyPresent(figi)) {
                                 String nameCompany = clientInvest.fetchNameCompanyByFigi(figi);
                                 companyDao.save(figi, nameCompany);
-                                log.info("figi: {} and name: {} add in Company", figi, nameCompany);
+                                log.info(COMPANY_ADDED_WITH_FIGI_AND_NAME, figi, nameCompany);
                             }
 
                             long idCompany = companyDao.getIdCompanyByFigi(figi);
                             List<CandleDto> candleDtos = figiAndCandles.get(figi);
 
                             candleDao.saveUniqueCandles(candleDtos, idCompany);
-                            log.info("figi: {}, size list candles: {}", figi, candleDtos.size());
+                            log.info(CANDLE_LIST_SIZE_FOR_FIGI, figi, candleDtos.size());
                         }
                 );
-        log.info("Свечи обработаны количество figi: {}", figiAndCandles.keySet().size());
+        log.info(CANDLES_PROCESSED_FOR_FIGI_COUNT, figiAndCandles.keySet().size());
     }
 
     @Override
@@ -68,11 +73,7 @@ public class CandleProcessingServiceImpl implements CandleProcessingService {
                             Metric statsMetric = candleDao.calculateStandardDeviationAndAverage(id);
                             metricDao.save(id, statsMetric);
 
-                            log.info(
-                                    "Company: {} is add standard deviation: {} and average: {} in table",
-                                    id,
-                                    statsMetric.standardDeviation(),
-                                    statsMetric.average());
+                            log.info(COMPANY_STATS_SAVED, id, statsMetric.standardDeviation(), statsMetric.average());
                         }
                 );
     }

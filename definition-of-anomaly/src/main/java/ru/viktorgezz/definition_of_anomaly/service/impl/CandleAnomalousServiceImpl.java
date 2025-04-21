@@ -14,6 +14,9 @@ import ru.viktorgezz.definition_of_anomaly.service.interf.CandleAnomalousService
 public class CandleAnomalousServiceImpl implements CandleAnomalousService {
 
     private static final Logger log = LoggerFactory.getLogger(CandleAnomalousServiceImpl.class);
+
+    private static final String ANOMALOUS_VOLUME_DETECTED = "Найден аномальный объем!!! figi: {}, volume: {}, time: {}";
+
     private final MetricDao metricDao;
     private final CompanyDao companyDao;
     private final ClientSenderAnomalyCandle sender;
@@ -30,9 +33,7 @@ public class CandleAnomalousServiceImpl implements CandleAnomalousService {
 
     public void foundAnomalyCandle(CandleMessage candle) {
         if (isAnomaly(candle)) {
-            log.info("Найден аномальный объем!!! figi: {}, volume: {}, time: {}",
-                    candle.getFigi(), candle.getVolume(), candle.getTime());
-
+            log.info(ANOMALOUS_VOLUME_DETECTED, candle.getFigi(), candle.getVolume(), candle.getTime());
             sender.send(candle);
         }
     }

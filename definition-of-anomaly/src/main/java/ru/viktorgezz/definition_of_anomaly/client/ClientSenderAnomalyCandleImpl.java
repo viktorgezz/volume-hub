@@ -15,6 +15,10 @@ import ru.viktorgezz.definition_of_anomaly.util.ConverterCandleMessageToAnomalyD
 public class ClientSenderAnomalyCandleImpl implements ClientSenderAnomalyCandle {
 
     private static final Logger log = LoggerFactory.getLogger(ClientSenderAnomalyCandleImpl.class);
+
+    private static final String STUB_FOR_EXCEPTION = "Заглушка для исключения";
+    private static final String ANOMALOUS_VOLUME_SENT = "Отправлен аномальный объём: {}";
+
     private final String URI_TELEGRAM;
     private final ConverterCandleMessageToAnomalyDto converter;
 
@@ -36,8 +40,8 @@ public class ClientSenderAnomalyCandleImpl implements ClientSenderAnomalyCandle 
         try {
             rT.postForEntity(URI_TELEGRAM, anomaly, CandleAnomalyDto.class);
         } catch (Exception e) {
-            log.error("Заглушка для исключения");
+            log.error(STUB_FOR_EXCEPTION);
         }
-        log.info("Отправлен аномальный объём: {}", anomaly);
+        log.info(ANOMALOUS_VOLUME_SENT, anomaly);
     }
 }

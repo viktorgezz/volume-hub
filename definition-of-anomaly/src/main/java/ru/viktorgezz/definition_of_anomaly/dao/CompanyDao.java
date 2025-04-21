@@ -12,6 +12,8 @@ import java.util.Objects;
 public class CompanyDao {
 
     private final static String NAME_TABLE_COMPANY = "company";
+    public static final String ERROR_FINDING_COMPANY_NAME_BY_FIGI = "Ошибка поиска имени компании по figi";
+
 
     private final JdbcTemplate jdbcTemplate;
 
@@ -53,7 +55,7 @@ public class CompanyDao {
                     )
             );
         } catch (NullPointerException | EmptyResultDataAccessException e) {
-            throw new RuntimeException("Ошибка поиска имени компании по figi");
+            throw new RuntimeException(ERROR_FINDING_COMPANY_NAME_BY_FIGI);
         }
     }
 

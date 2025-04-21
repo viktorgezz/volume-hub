@@ -13,6 +13,8 @@ public class CandleMinuteConsumer {
 
     private static final Logger log = LoggerFactory.getLogger(CandleMinuteConsumer.class);
 
+    private static final String FIGI_AND_VOLUME_INFO = "figi: {}, volume: {}";
+
     private final CandleAnomalousService anomalousCandle;
 
     @Autowired
@@ -22,7 +24,7 @@ public class CandleMinuteConsumer {
 
     @RabbitListener(queues = "${spring.rabbitmq.template.queue}")
     public void receiveMinuteCandles(CandleMessage candleMessage) {
-        log.info("figi: {}, volume: {}", candleMessage.getFigi(), candleMessage.getVolume());
+        log.info(FIGI_AND_VOLUME_INFO, candleMessage.getFigi(), candleMessage.getVolume());
         anomalousCandle.foundAnomalyCandle(candleMessage);
     }
 }
