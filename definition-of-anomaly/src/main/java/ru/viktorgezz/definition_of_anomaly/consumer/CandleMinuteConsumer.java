@@ -1,0 +1,28 @@
+package ru.viktorgezz.definition_of_anomaly.consumer;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.amqp.rabbit.annotation.RabbitListener;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Component;
+import ru.viktorgezz.definition_of_anomaly.dto.CandleMessage;
+import ru.viktorgezz.definition_of_anomaly.service.interf.CandleAnomalousService;
+
+@Component
+public class CandleMinuteConsumer {
+
+    private static final Logger log = LoggerFactory.getLogger(CandleMinuteConsumer.class);
+
+    private final CandleAnomalousService anomalousCandle;
+
+    @Autowired
+    public CandleMinuteConsumer(CandleAnomalousService anomalousCandle) {
+        this.anomalousCandle = anomalousCandle;
+    }
+
+    @RabbitListener(queues = "${spring.rabbitmq.template.queue}")
+    public void receiveMinuteCandles(CandleMessage candleMessage) {
+        log.info("figi: {}, volume: {}", candleMessage.getFigi(), candleMessage.getVolume());
+        anomalousCandle.foundAnomalyCandle(candleMessage);
+    }
+}
