@@ -42,6 +42,12 @@ public class CandleController {
         return "Успех";
     }
 
+    @GetMapping("/minute/disconnection")
+    public String disconnect() {
+        candleStreamService.cancelStream();
+        return "Успешная отмена подписки на свечи";
+    }
+
     @GetMapping("minute/for-last-day")
     public Map<String, List<CustomCandle>> sendMinuteCandlesForLastDay() {
         return dataMarketHistoric.getMinuteCandlesForLastDayAllFigis();

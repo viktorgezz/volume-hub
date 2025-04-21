@@ -1,11 +1,13 @@
 package ru.viktorgezz.api_T_connector.service.impl;
 
+import io.grpc.StatusRuntimeException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import ru.tinkoff.piapi.contract.v1.*;
 import ru.tinkoff.piapi.core.stream.MarketDataStreamService;
+import ru.tinkoff.piapi.core.stream.MarketDataSubscriptionService;
 import ru.tinkoff.piapi.core.utils.MapperUtils;
 import ru.viktorgezz.api_T_connector.model.CandleMessage;
 import ru.viktorgezz.api_T_connector.service.interf.CandleStreamService;
@@ -24,6 +26,8 @@ public class CandleStreamServiceImpl implements CandleStreamService {
     private final MarketDataStreamService marketDataStreamService;
     private final RabbitMQProducerImpl producer;
 
+    private MarketDataSubscriptionService streamSubscription;
+
     @Autowired
     public CandleStreamServiceImpl(
             ConnectTApiInvest apiInvest,
@@ -36,42 +40,55 @@ public class CandleStreamServiceImpl implements CandleStreamService {
     public void streamLatestMinuteCandles(List<String> figis) {
         Consumer<Throwable> onErrorCallback = error -> log.error("Stream error: ", error);
 
-        var stream = this.marketDataStreamService
-                .newStream(
-                        "candles_stream",
-                        event -> {
-                            if (event.hasCandle()) {
-                                Candle candle = event.getCandle();
-                                log.info("Latest minute candle for FIGI {}: Open={}, High={}, Low={}, Close={}, Volume={}, Time={}",
-                                        candle.getFigi(),
-                                        MapperUtils.quotationToBigDecimal(candle.getOpen()),
-                                        MapperUtils.quotationToBigDecimal(candle.getHigh()),
-                                        MapperUtils.quotationToBigDecimal(candle.getLow()),
-                                        MapperUtils.quotationToBigDecimal(candle.getClose()),
-                                        candle.getVolume(),
-                                        timestampToString(candle.getTime())
-                                );
+        try {
+            this.streamSubscription = this.marketDataStreamService
+                    .newStream(
+                            "candles_stream",
+                            event -> {
+                                if (event.hasCandle()) {
+                                    Candle candle = event.getCandle();
+                                    log.info("Latest minute candle for FIGI {}: Open={}, High={}, Low={}, Close={}, Volume={}, Time={}",
+                                            candle.getFigi(),
+                                            MapperUtils.quotationToBigDecimal(candle.getOpen()),
+                                            MapperUtils.quotationToBigDecimal(candle.getHigh()),
+                                            MapperUtils.quotationToBigDecimal(candle.getLow()),
+                                            MapperUtils.quotationToBigDecimal(candle.getClose()),
+                                            candle.getVolume(),
+                                            timestampToString(candle.getTime())
+                                    );
 
-                                CandleMessage candleMessage = new CandleMessage(
-                                        candle.getFigi(),
-                                        MapperUtils.quotationToBigDecimal(candle.getOpen()),
-                                        MapperUtils.quotationToBigDecimal(candle.getClose()),
-                                        MapperUtils.quotationToBigDecimal(candle.getHigh()),
-                                        MapperUtils.quotationToBigDecimal(candle.getLow()),
-                                        candle.getVolume(),
-                                        timestampToString(candle.getTime())
-                                );
+                                    CandleMessage candleMessage = new CandleMessage(
+                                            candle.getFigi(),
+                                            MapperUtils.quotationToBigDecimal(candle.getOpen()),
+                                            MapperUtils.quotationToBigDecimal(candle.getClose()),
+                                            MapperUtils.quotationToBigDecimal(candle.getHigh()),
+                                            MapperUtils.quotationToBigDecimal(candle.getLow()),
+                                            candle.getVolume(),
+                                            timestampToString(candle.getTime())
+                                    );
 
-                                producer.sendCandle(candleMessage);
-                                log.info("Candle send. Figi: {}", candle.getFigi());
-                            }
+                                    producer.sendCandle(candleMessage);
+                                    log.info("Candle send. Figi: {}", candle.getFigi());
+                                }
 
-                        },
-                        onErrorCallback);
+                            },
+                            onErrorCallback);
 
-        stream.subscribeCandles(
-                figis,
-                SubscriptionInterval.SUBSCRIPTION_INTERVAL_ONE_MINUTE,
-                true);
+            this.streamSubscription.subscribeCandles(
+                    figis,
+                    SubscriptionInterval.SUBSCRIPTION_INTERVAL_ONE_MINUTE,
+                    true);
+        } catch (Exception e) {
+            log.error("Error: {}", e.getMessage());
+        }
+    }
+
+    public void cancelStream() {
+        try {
+            this.streamSubscription.cancel();
+            log.info("Подписка разорвана");
+        } catch (Exception e) {
+            log.error("Error: {}", e.getMessage());
+        }
     }
 }
