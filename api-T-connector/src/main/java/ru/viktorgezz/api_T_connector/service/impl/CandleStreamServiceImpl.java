@@ -7,6 +7,7 @@ import org.springframework.stereotype.Component;
 import ru.tinkoff.piapi.contract.v1.*;
 import ru.tinkoff.piapi.core.stream.MarketDataStreamService;
 import ru.tinkoff.piapi.core.utils.MapperUtils;
+import ru.viktorgezz.api_T_connector.model.CandleMessage;
 import ru.viktorgezz.api_T_connector.service.interf.CandleStreamService;
 import ru.viktorgezz.api_T_connector.util.ConnectTApiInvest;
 
@@ -15,22 +16,26 @@ import java.util.function.Consumer;
 
 import static ru.tinkoff.piapi.core.utils.DateUtils.timestampToString;
 
-/// invest-api-java-sdk/example/basic-example/src/main/java/ru/tinkoff/piapi/example
 @Component
 public class CandleStreamServiceImpl implements CandleStreamService {
 
     private static final Logger log = LoggerFactory.getLogger(CandleStreamServiceImpl.class);
 
     private final MarketDataStreamService marketDataStreamService;
+    private final RabbitMQProducerImpl producer;
 
     @Autowired
-    public CandleStreamServiceImpl(ConnectTApiInvest apiInvest) {
+    public CandleStreamServiceImpl(
+            ConnectTApiInvest apiInvest,
+            RabbitMQProducerImpl producer
+    ) {
         this.marketDataStreamService = apiInvest.getInvestApi().getMarketDataStreamService();
+        this.producer = producer;
     }
 
     public void streamLatestMinuteCandles(List<String> figis) {
         Consumer<Throwable> onErrorCallback = error -> log.error("Stream error: ", error);
-        
+
         var stream = this.marketDataStreamService
                 .newStream(
                         "candles_stream",
@@ -44,8 +49,23 @@ public class CandleStreamServiceImpl implements CandleStreamService {
                                         MapperUtils.quotationToBigDecimal(candle.getLow()),
                                         MapperUtils.quotationToBigDecimal(candle.getClose()),
                                         candle.getVolume(),
-                                        timestampToString(candle.getTime()));
+                                        timestampToString(candle.getTime())
+                                );
+
+                                CandleMessage candleMessage = new CandleMessage(
+                                        candle.getFigi(),
+                                        MapperUtils.quotationToBigDecimal(candle.getOpen()),
+                                        MapperUtils.quotationToBigDecimal(candle.getClose()),
+                                        MapperUtils.quotationToBigDecimal(candle.getHigh()),
+                                        MapperUtils.quotationToBigDecimal(candle.getLow()),
+                                        candle.getVolume(),
+                                        timestampToString(candle.getTime())
+                                );
+
+                                producer.sendCandle(candleMessage);
+                                log.info("Candle send. Figi: {}", candle.getFigi());
                             }
+
                         },
                         onErrorCallback);
 
@@ -53,6 +73,5 @@ public class CandleStreamServiceImpl implements CandleStreamService {
                 figis,
                 SubscriptionInterval.SUBSCRIPTION_INTERVAL_ONE_MINUTE,
                 true);
-
     }
 }

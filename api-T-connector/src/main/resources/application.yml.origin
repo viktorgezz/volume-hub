@@ -2,18 +2,31 @@ spring:
   application:
     name: api-T-connector
   datasource:
-    url: jdbc:h2:file:./src/main/resources/database.db
+    url: ${datasource_url_connect}
     driver-class-name: org.h2.Driver
-    username:
-    password:
+    username: ${datasource_username_connect}
+    password: ${datasource_password_connect}
   h2:
     console:
-      enabled: true
+      enabled: false
       path: /h2-console
   sql:
     init:
       mode: always
       schema-locations: classpath:init_table.sql
+  rabbitmq:
+    host: ${rabbitmq.host}
+    port: ${rabbitmq.port}
+    username: ${rabbitmq.username}
+    password: ${rabbitmq.password}
+    template:
+      queue: ${rabbitmq.template.queue}
+      exchange: ${rabbitmq.template.exchange}
+      routing-key: ${rabbitmq.template.routing-key}
+
+
+server:
+  port: 8085
 
 token:
   invest-t: ${token_t_invest}

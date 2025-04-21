@@ -1,5 +1,7 @@
 package ru.viktorgezz.api_T_connector.controller;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -14,9 +16,10 @@ import java.util.List;
 import java.util.Map;
 
 @RestController
-@RequestMapping("/minute-candles")
+@RequestMapping("/candle")
 public class CandleController {
 
+    private static final Logger log = LoggerFactory.getLogger(CandleController.class);
     private final CandleStreamService candleStreamService;
     private final HistoricalCandleMarketService dataMarketHistoric;
 
@@ -33,22 +36,27 @@ public class CandleController {
         this.figis = figiListObject.getFigis();
     }
 
-    @GetMapping("/now")
+    @GetMapping("/minute/now")
     public String runLogVolume() {
         this.candleStreamService.streamLatestMinuteCandles(this.figis);
         return "Успех";
     }
 
-    @GetMapping("/for-last-day")
-    public Map<String, List<CustomCandle>> getMinuteCandlesForLastDay() {
+    @GetMapping("minute/for-last-day")
+    public Map<String, List<CustomCandle>> sendMinuteCandlesForLastDay() {
         return dataMarketHistoric.getMinuteCandlesForLastDayAllFigis();
     }
 
-    @GetMapping("/for-last-hour/{figi}")
-    public Map<String, List<CustomCandle>> getMinuteCandlesForLastHourByFigi(
+    @GetMapping("minute/for-last-hour/{figi}")
+    public Map<String, List<CustomCandle>> sendMinuteCandlesForLastHourByFigi(
             @PathVariable("figi") String figi
     ) {
         return dataMarketHistoric.getMinuteCandlesForLastHourByFigi(figi);
+    }
+
+    @GetMapping("/day/{figi}")
+    public CustomCandle sendDayCandleCurrent(@PathVariable("figi") String figi) {
+        return dataMarketHistoric.getDayCandleCurrent(figi);
     }
 }
 

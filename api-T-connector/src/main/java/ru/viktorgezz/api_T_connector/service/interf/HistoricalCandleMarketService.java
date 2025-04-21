@@ -7,6 +7,8 @@ import java.util.Map;
 
 public interface HistoricalCandleMarketService {
 
+    CustomCandle getDayCandleCurrent(String figi);
+
     Map<String, List<CustomCandle>> getMinuteCandlesForLastHourByFigi(
             final String figi
     );

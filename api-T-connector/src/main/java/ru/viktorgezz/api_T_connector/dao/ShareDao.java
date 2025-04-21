@@ -1,4 +1,4 @@
-package ru.viktorgezz.api_T_connector.util;
+package ru.viktorgezz.api_T_connector.dao;
 
 import com.opencsv.CSVReader;
 import com.opencsv.exceptions.CsvValidationException;
@@ -9,11 +9,13 @@ import org.springframework.core.io.ClassPathResource;
 import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Component;
+import ru.viktorgezz.api_T_connector.model.Share;
 
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.nio.charset.StandardCharsets;
-import java.util.*;
+import java.util.List;
+import java.util.Optional;
 
 @Component
 public class ShareDao {
@@ -37,8 +39,33 @@ public class ShareDao {
         return jdbcTemplate.queryForObject(sql, String.class, figi);
     }
 
+    public String getTickerByFigi(String figi) {
+        String sql = "SELECT ticker FROM _share WHERE figi = ?";
+        return jdbcTemplate.queryForObject(sql, String.class, figi);
+
+    }
+
+    public List<Share> getAllShare() {
+        final String sql = "SELECT * FROM _share";
+        return jdbcTemplate.query(
+                sql,
+                (rs, rowNum) -> {
+                    return new Share(
+                            rs.getInt("id"),
+                            rs.getString("figi"),
+                            rs.getString("company"),
+                            rs.getString("ticker")
+                    );
+                });
+    }
+
+    public List<String> getAllFigis() {
+        final String sql = "Select figi FROM _share";
+        return jdbcTemplate.queryForList(sql, String.class);
+    }
+
     public Optional<String> importCsvToFigisTable() {
-        final String sqlAddCompany = "INSERT INTO _share (figi, company) VALUES(?, ?)";
+        final String sqlAddCompany = "INSERT INTO _share (figi, company, ticker) VALUES(?, ?, ?)";
         final String sqlSelectFigi = "SELECT figi FROM _share WHERE figi = ?";
         final String fileName = "figi.csv";
 
@@ -49,7 +76,8 @@ public class ShareDao {
             String[] line;
 
             while ((line = csvReader.readNext()) != null) {
-                if (line.length >= 2) {
+                if (line.length >= 3) {
+                    String ticker = line[2].trim();
                     String figi = line[1].trim();
                     String company = line[0].trim();
 
@@ -60,12 +88,12 @@ public class ShareDao {
                                 String.class,
                                 figi);
                     } catch (EmptyResultDataAccessException e) {
-                        log.info("company not founded: {}, {}", company, figi);
+                        log.info("company not founded: {}, {}, {}", company, figi, ticker);
                     }
                     if (figiFound == null || figiFound.isEmpty()) {
-                        jdbcTemplate.update(sqlAddCompany, figi, company);
+                        jdbcTemplate.update(sqlAddCompany, figi, company, ticker);
                     } else {
-                        log.info("Компания уже есть: {}, {}", company, figi);
+                        log.info("Компания уже есть: {}, {}, {}", company, figi, ticker);
                     }
 
                 } else {
@@ -81,22 +109,4 @@ public class ShareDao {
         return Optional.of("Данные успешно загружены");
     }
 
-    public void addFigis() {
-        final String sql = "INSERT INTO _share (figi, company) VALUES(?, ?)";
-        jdbcTemplate.update(sql, "BBG004S683W7", "Аэрофлот");
-    }
-
-//    public void executeQuery() {
-//        String sql = "SELECT * FROM your_table";
-//        jdbcTemplate.query(sql, (rs, rowNum) -> {
-//            System.out.println("ID: " + rs.getInt("id") + ", Name: " + rs.getString("name"));
-//            return null;
-//        });
-//    }
-//
-//    // Пример выполнения INSERT-запроса
-//    public void executeUpdate() {
-//        String sql = "INSERT INTO your_table (name) VALUES (?)";
-//        jdbcTemplate.update(sql, "Example");
-//    }
 }

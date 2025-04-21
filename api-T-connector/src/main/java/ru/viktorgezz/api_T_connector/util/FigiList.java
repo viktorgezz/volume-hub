@@ -3,6 +3,7 @@ package ru.viktorgezz.api_T_connector.util;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
+import ru.viktorgezz.api_T_connector.dao.ShareDao;
 
 import java.util.List;
 

@@ -3,7 +3,7 @@ package ru.viktorgezz.api_T_connector.controller;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RestController;
-import ru.viktorgezz.api_T_connector.util.ShareDao;
+import ru.viktorgezz.api_T_connector.dao.ShareDao;
 
 @RestController
 public class CsvToDatabase {

@@ -12,7 +12,6 @@ import ru.viktorgezz.api_T_connector.model.CustomCandle;
 import ru.viktorgezz.api_T_connector.service.interf.HistoricalCandleMarketService;
 import ru.viktorgezz.api_T_connector.util.ConnectTApiInvest;
 import ru.viktorgezz.api_T_connector.util.FigiList;
-import ru.viktorgezz.api_T_connector.util.ShareDao;
 
 import java.math.BigDecimal;
 import java.sql.Timestamp;
@@ -21,6 +20,8 @@ import java.time.temporal.ChronoUnit;
 import java.util.*;
 import java.util.stream.Collectors;
 
+import static ru.tinkoff.piapi.contract.v1.CandleInterval.CANDLE_INTERVAL_1_MIN;
+import static ru.tinkoff.piapi.contract.v1.CandleInterval.CANDLE_INTERVAL_DAY;
 import static ru.tinkoff.piapi.contract.v1.InstrumentStatus.INSTRUMENT_STATUS_BASE;
 import static ru.tinkoff.piapi.core.utils.MapperUtils.mapUnitsAndNanos;
 
@@ -31,6 +32,7 @@ public class HistoricalCandleMarketServiceImpl implements HistoricalCandleMarket
 
     private static final int ONE_DAY_IN_MINUTES = 1440;
     private static final int ONE_HOUR_IN_MINUTES = 60;
+    private static final int THREE_DAY_IN_MINUTES = 4320;
     private static final String CANDLE_FETCH_MESSAGE = "Получение свечи с figi {} за последние минут {}";
 
     private final InstrumentsService instrumentsService;
@@ -48,10 +50,16 @@ public class HistoricalCandleMarketServiceImpl implements HistoricalCandleMarket
         this.figis = figiListObject.getFigis();
     }
 
+    public CustomCandle getDayCandleCurrent(String figi) {
+        LinkedList<CustomCandle> candles = new LinkedList<>(fetchIntervalCandlesByFigiAndTimeAndInterval(figi, THREE_DAY_IN_MINUTES, CANDLE_INTERVAL_DAY));
+        log.info(candles.getLast().toString());
+        return candles.getLast();
+    }
+
     public Map<String, List<CustomCandle>> getMinuteCandlesForLastHourByFigi(
             final String figi) {
         log.info(CANDLE_FETCH_MESSAGE, figi, ONE_HOUR_IN_MINUTES);
-        return Collections.singletonMap(figi, fetchCandlesByFigiAndTime(figi, ONE_HOUR_IN_MINUTES));
+        return Collections.singletonMap(figi, fetchIntervalCandlesByFigiAndTimeAndInterval(figi, ONE_HOUR_IN_MINUTES, CANDLE_INTERVAL_1_MIN));
     }
 
     public Map<String, List<CustomCandle>> getMinuteCandlesForLastDayAllFigis() {
@@ -60,26 +68,27 @@ public class HistoricalCandleMarketServiceImpl implements HistoricalCandleMarket
                 .stream()
                 .collect(Collectors.toMap(
                         figi -> figi,
-                        figi -> fetchCandlesByFigiAndTime(figi, ONE_DAY_IN_MINUTES)
+                        figi -> fetchIntervalCandlesByFigiAndTimeAndInterval(figi, ONE_DAY_IN_MINUTES, CANDLE_INTERVAL_1_MIN)
                 ));
     }
 
-    private List<CustomCandle> fetchCandlesByFigiAndTime(String figi, int minutesBack) {
-        List<CustomCandle> candles = getMinuteCandlesForTimeByFigi(figi, minutesBack);
-        log.info("Для figi {} получено {} минутных свечей", figi, candles.size());
+    private List<CustomCandle> fetchIntervalCandlesByFigiAndTimeAndInterval(String figi, int minutesBack, CandleInterval interval) {
+        List<CustomCandle> candles = getIntervalCandlesForTimeByFigi(figi, minutesBack, interval);
+        log.info("Для figi {} получено {} {} свечей", figi, candles.size(), interval.toString());
         return candles;
     }
 
-    private List<CustomCandle> getMinuteCandlesForTimeByFigi(
+    private List<CustomCandle> getIntervalCandlesForTimeByFigi(
             final String figi,
-            final int minutesBack
+            final int minutesBack,
+            final CandleInterval interval
     ) {
         try {
             return marketDataService.getCandlesSync(
                             figi,
                             Instant.now().minus(minutesBack, ChronoUnit.MINUTES),
                             Instant.now(),
-                            CandleInterval.CANDLE_INTERVAL_1_MIN
+                            interval
                     )
                     .stream().map(candle -> new CustomCandle(
                             convertQuotationToBigDecimal(candle.getOpen()),
