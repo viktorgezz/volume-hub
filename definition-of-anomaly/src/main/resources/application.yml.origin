@@ -25,6 +25,6 @@ server:
 
 service:
   volume:
-    url: ${service.volume.url}
+    url: ${volume-url}
   telegram:
-    uri: ${service.telegram.uri}
+    uri: ${telegram-uri}

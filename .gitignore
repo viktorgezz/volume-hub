@@ -3,6 +3,8 @@
 *.env
 *.db.trace.db
 
+!docker-compose-project.yml
+
 target/
 !.mvn/wrapper/maven-wrapper.jar
 !**/src/main/**/target/
