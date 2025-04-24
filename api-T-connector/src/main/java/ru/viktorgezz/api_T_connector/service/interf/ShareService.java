@@ -3,8 +3,9 @@ package ru.viktorgezz.api_T_connector.service.interf;
 import ru.viktorgezz.api_T_connector.model.Share;
 
 import java.util.List;
+import java.util.Optional;
 
-public interface CompanyService {
+public interface ShareService {
 
     String getCompanyNameByFigi(String figi);
 
@@ -13,4 +14,6 @@ public interface CompanyService {
     List<Share> getAllShare();
 
     List<String> getAllFigis();
+
+    Optional<String> importCsvToFigisTable();
 }

@@ -1,6 +1,5 @@
 package ru.viktorgezz.api_T_connector.service.impl;
 
-import io.grpc.StatusRuntimeException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -11,9 +10,9 @@ import ru.tinkoff.piapi.core.stream.MarketDataSubscriptionService;
 import ru.tinkoff.piapi.core.utils.MapperUtils;
 import ru.viktorgezz.api_T_connector.model.CandleMessage;
 import ru.viktorgezz.api_T_connector.service.interf.CandleStreamService;
+import ru.viktorgezz.api_T_connector.service.interf.ShareService;
 import ru.viktorgezz.api_T_connector.util.ConnectTApiInvest;
 
-import java.util.List;
 import java.util.function.Consumer;
 
 import static ru.tinkoff.piapi.core.utils.DateUtils.timestampToString;
@@ -25,19 +24,22 @@ public class CandleStreamServiceImpl implements CandleStreamService {
 
     private final MarketDataStreamService marketDataStreamService;
     private final RabbitMQProducerImpl producer;
+    private final ShareService shareService;
 
     private MarketDataSubscriptionService streamSubscription;
 
     @Autowired
     public CandleStreamServiceImpl(
             ConnectTApiInvest apiInvest,
-            RabbitMQProducerImpl producer
+            RabbitMQProducerImpl producer,
+            ShareService shareService
     ) {
         this.marketDataStreamService = apiInvest.getInvestApi().getMarketDataStreamService();
         this.producer = producer;
+        this.shareService = shareService;
     }
 
-    public void streamLatestMinuteCandles(List<String> figis) {
+    public void streamLatestMinuteCandles() {
         Consumer<Throwable> onErrorCallback = error -> log.error("Stream error: ", error);
 
         try {
@@ -75,7 +77,7 @@ public class CandleStreamServiceImpl implements CandleStreamService {
                             onErrorCallback);
 
             this.streamSubscription.subscribeCandles(
-                    figis,
+                    shareService.getAllFigis(),
                     SubscriptionInterval.SUBSCRIPTION_INTERVAL_ONE_MINUTE,
                     true);
         } catch (Exception e) {

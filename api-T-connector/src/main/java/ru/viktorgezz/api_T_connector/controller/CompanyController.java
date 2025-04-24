@@ -5,41 +5,41 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RestController;
 import ru.viktorgezz.api_T_connector.model.Share;
-import ru.viktorgezz.api_T_connector.service.interf.CompanyService;
+import ru.viktorgezz.api_T_connector.service.interf.ShareService;
 
 import java.util.List;
 
 @RestController
 public class CompanyController {
 
-    private final CompanyService companyService;
+    private final ShareService shareService;
 
     @Autowired
-    public CompanyController(CompanyService companyService) {
-        this.companyService = companyService;
+    public CompanyController(ShareService shareService) {
+        this.shareService = shareService;
     }
 
     @GetMapping("/company-name/{figi}")
     public String sendCompanyNameByFigi(
             @PathVariable("figi") String figi
     ) {
-        return companyService.getCompanyNameByFigi(figi);
+        return shareService.getCompanyNameByFigi(figi);
     }
 
     @GetMapping("company-ticker/{figi}")
     public String sendTickerByFigi(
             @PathVariable("figi") String figi
     ) {
-        return companyService.getTickerByFigi(figi);
+        return shareService.getTickerByFigi(figi);
     }
 
     @GetMapping("/share")
     public List<Share> sendShare() {
-        return companyService.getAllShare();
+        return shareService.getAllShare();
     }
 
     @GetMapping("/figi")
     public List<String> sendFigis() {
-        return companyService.getAllFigis();
+        return shareService.getAllFigis();
     }
 }

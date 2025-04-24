@@ -11,7 +11,6 @@ import ru.tinkoff.piapi.core.MarketDataService;
 import ru.viktorgezz.api_T_connector.model.CustomCandle;
 import ru.viktorgezz.api_T_connector.service.interf.HistoricalCandleMarketService;
 import ru.viktorgezz.api_T_connector.util.ConnectTApiInvest;
-import ru.viktorgezz.api_T_connector.util.FigiList;
 
 import java.math.BigDecimal;
 import java.sql.Timestamp;
@@ -35,19 +34,19 @@ public class HistoricalCandleMarketServiceImpl implements HistoricalCandleMarket
     private static final int THREE_DAY_IN_MINUTES = 4320;
     private static final String CANDLE_FETCH_MESSAGE = "Получение свечи с figi {} за последние минут {}";
 
-    private final InstrumentsService instrumentsService;
+    private final ShareServiceImpl shareService;
+
     private final MarketDataService marketDataService;
+    private final InstrumentsService instrumentsService;
 
-
-    private final List<String> figis;
 
     @Autowired
     public HistoricalCandleMarketServiceImpl(
             ConnectTApiInvest apiInvest,
-            FigiList figiListObject) {
+            ShareServiceImpl shareService) {
         this.instrumentsService = apiInvest.getInvestApi().getInstrumentsService();
         this.marketDataService = apiInvest.getInvestApi().getMarketDataService();
-        this.figis = figiListObject.getFigis();
+        this.shareService = shareService;
     }
 
     public CustomCandle getDayCandleCurrent(String figi) {
@@ -64,7 +63,7 @@ public class HistoricalCandleMarketServiceImpl implements HistoricalCandleMarket
 
     public Map<String, List<CustomCandle>> getMinuteCandlesForLastDayAllFigis() {
         log.info(CANDLE_FETCH_MESSAGE, "Всех свечей", ONE_DAY_IN_MINUTES);
-        return figis
+        return shareService.getAllFigis()
                 .stream()
                 .collect(Collectors.toMap(
                         figi -> figi,

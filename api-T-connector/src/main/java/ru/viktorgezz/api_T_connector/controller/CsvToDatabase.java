@@ -3,21 +3,21 @@ package ru.viktorgezz.api_T_connector.controller;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RestController;
-import ru.viktorgezz.api_T_connector.dao.ShareDao;
+import ru.viktorgezz.api_T_connector.service.interf.ShareService;
 
 @RestController
 public class CsvToDatabase {
 
-    private final ShareDao shareDao;
+    private final ShareService shareService;
 
     @Autowired
-    public CsvToDatabase(ShareDao shareDao) {
-        this.shareDao = shareDao;
+    public CsvToDatabase(ShareService shareService) {
+        this.shareService = shareService;
     }
 
     @PostMapping("/import")
     public String importCSV() {
-        return shareDao.importCsvToFigisTable()
+        return shareService.importCsvToFigisTable()
                 .orElseThrow(() -> new RuntimeException("Ошибка импорта в базу данных из csv"));
     }
 }
