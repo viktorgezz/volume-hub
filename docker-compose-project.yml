@@ -84,6 +84,15 @@ services:
       - api-app
       - db-2
 
+  app:
+    build:
+      context: ./test_project
+      dockerfile: Dockerfile
+    container_name:
+      app-python
+    ports:
+      - '5000:5000'
+
 volumes:
   postgres_data:
   rabbitmq_data:
