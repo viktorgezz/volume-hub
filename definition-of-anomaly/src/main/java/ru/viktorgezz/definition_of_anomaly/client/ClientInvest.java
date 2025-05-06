@@ -11,5 +11,7 @@ public interface ClientInvest {
 
     String fetchNameCompanyByFigi(String figi);
 
-    CandleDto fetchDayCandleCurrDay(String figi);
+    List<CandleDto> fetchMinuteCandlesForLastHour(String figi);
+
+    CandleDto fetchDayCandleCurr(String figi);
 }

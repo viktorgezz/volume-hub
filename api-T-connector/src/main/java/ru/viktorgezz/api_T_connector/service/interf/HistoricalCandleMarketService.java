@@ -9,9 +9,7 @@ public interface HistoricalCandleMarketService {
 
     CustomCandle getDayCandleCurrent(String figi);
 
-    Map<String, List<CustomCandle>> getMinuteCandlesForLastHourByFigi(
-            final String figi
-    );
+    List<CustomCandle> getMinuteCandlesForLastHourByFigi(final String figi);
 
     Map<String, List<CustomCandle>> getMinuteCandlesForLastDayAllFigis();
 

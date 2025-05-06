@@ -55,10 +55,10 @@ public class HistoricalCandleMarketServiceImpl implements HistoricalCandleMarket
         return candles.getLast();
     }
 
-    public Map<String, List<CustomCandle>> getMinuteCandlesForLastHourByFigi(
+    public List<CustomCandle> getMinuteCandlesForLastHourByFigi(
             final String figi) {
         log.info(CANDLE_FETCH_MESSAGE, figi, ONE_HOUR_IN_MINUTES);
-        return Collections.singletonMap(figi, fetchIntervalCandlesByFigiAndTimeAndInterval(figi, ONE_HOUR_IN_MINUTES, CANDLE_INTERVAL_1_MIN));
+        return fetchIntervalCandlesByFigiAndTimeAndInterval(figi, ONE_HOUR_IN_MINUTES, CANDLE_INTERVAL_1_MIN);
     }
 
     public Map<String, List<CustomCandle>> getMinuteCandlesForLastDayAllFigis() {

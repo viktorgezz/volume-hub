@@ -38,12 +38,13 @@ public class ConverterCandleMessageToAnomalyDto {
                     .setPriceCurrent(candle.getClose())
                     .setVolume(candle.getVolume())
                     .setPriceDailyChangeAsPercentage(
-                            calculatePriceChangeAsPercentage(clientInvest.fetchDayCandleCurrDay(figi))
+                            calculatePriceChangeAsPercentage(clientInvest.fetchDayCandleCurr(figi))
                     )
                     .setPriceMinuteChangeAsPercentage(
                             calculatePriceChangeAsPercentage(candle)
                     )
                     .setTime(candle.getTime())
+                    .setCandlesLastHour(clientInvest.fetchMinuteCandlesForLastHour(figi))
                     .build();
         } catch (Exception e) {
             log.error(e.getMessage());

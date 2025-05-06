@@ -52,14 +52,21 @@ public class ClientTInvest implements ClientInvest {
         );
     }
 
-    public String fetchNameCompanyByFigi(String figi) {
-        return rT.getForObject(
-                String.format("%s/company-name/%s", API_SERVICE_VOLUME, figi),
-                String.class
+    public List<CandleDto> fetchMinuteCandlesForLastHour(String figi) {
+        return extractResponseBodyOrThrow(rT
+                .exchange(
+                        String.format("%s/candle/minute/for-last-hour/%s", API_SERVICE_VOLUME, figi),
+                        HttpMethod.GET,
+                        null,
+                        new ParameterizedTypeReference<List<CandleDto>>() {
+                        }
+                )
         );
     }
 
-    public CandleDto fetchDayCandleCurrDay(String figi) {
+
+
+    public CandleDto fetchDayCandleCurr(String figi) {
         return extractResponseBodyOrThrow(rT
                 .exchange(
                         String.format("%s/candle/day/%s", API_SERVICE_VOLUME, figi),
@@ -68,6 +75,13 @@ public class ClientTInvest implements ClientInvest {
                         new ParameterizedTypeReference<CandleDto>() {
                         }
                 )
+        );
+    }
+
+    public String fetchNameCompanyByFigi(String figi) {
+        return rT.getForObject(
+                String.format("%s/company-name/%s", API_SERVICE_VOLUME, figi),
+                String.class
         );
     }
 

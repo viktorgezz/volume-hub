@@ -2,6 +2,7 @@ package ru.viktorgezz.definition_of_anomaly.dto;
 
 import java.math.BigDecimal;
 import java.sql.Timestamp;
+import java.util.List;
 
 public class CandleAnomalyDto {
 
@@ -11,6 +12,7 @@ public class CandleAnomalyDto {
     private BigDecimal priceDailyChangeAsPercentage;
     private BigDecimal priceMinuteChangeAsPercentage;
     private Timestamp time;
+    private List<CandleDto> candlesLastHour;
 
     private CandleAnomalyDto(Builder builder) {
         this.name = builder.name;
@@ -19,18 +21,7 @@ public class CandleAnomalyDto {
         this.priceDailyChangeAsPercentage = builder.priceDailyChangeAsPercentage;
         this.priceMinuteChangeAsPercentage = builder.priceMinuteChangeAsPercentage;
         this.time = builder.time;
-    }
-
-    @Override
-    public String toString() {
-        return "CandleAnomalyDto{" +
-                "name='" + name + '\'' +
-                ", priceCurrent=" + priceCurrent +
-                ", volume=" + volume +
-                ", priceDailyChangeAsPercentage=" + priceDailyChangeAsPercentage +
-                ", priceMinuteChangeAsPercentage=" + priceMinuteChangeAsPercentage +
-                ", time=" + time +
-                '}';
+        this.candlesLastHour = builder.candlesLastHour;
     }
 
     public static class Builder {
@@ -40,6 +31,7 @@ public class CandleAnomalyDto {
         private BigDecimal priceDailyChangeAsPercentage;
         private BigDecimal priceMinuteChangeAsPercentage;
         private Timestamp time;
+        private List<CandleDto> candlesLastHour;
 
         public Builder setName(String name) {
             this.name = name;
@@ -68,6 +60,11 @@ public class CandleAnomalyDto {
 
         public Builder setTime(Timestamp time) {
             this.time = time;
+            return this;
+        }
+
+        public Builder setCandlesLastHour(List<CandleDto> candlesLastHour) {
+            this.candlesLastHour = candlesLastHour;
             return this;
         }
 
@@ -122,5 +119,13 @@ public class CandleAnomalyDto {
 
     public void setTime(Timestamp time) {
         this.time = time;
+    }
+
+    public List<CandleDto> getCandlesLastHour() {
+        return candlesLastHour;
+    }
+
+    public void setCandlesLastHour(List<CandleDto> candlesLastHour) {
+        this.candlesLastHour = candlesLastHour;
     }
 }

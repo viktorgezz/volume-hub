@@ -46,7 +46,7 @@ public class CandleController {
     }
 
     @GetMapping("minute/for-last-hour/{figi}")
-    public Map<String, List<CustomCandle>> sendMinuteCandlesForLastHourByFigi(
+    public List<CustomCandle> sendMinuteCandlesForLastHourByFigi(
             @PathVariable("figi") String figi
     ) {
         return dataMarketHistoric.getMinuteCandlesForLastHourByFigi(figi);
