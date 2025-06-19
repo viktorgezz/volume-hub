@@ -13,48 +13,38 @@ import java.util.List;
 import java.util.Map;
 
 @RestController
-@RequestMapping("/candle")
+@RequestMapping("/api/v1/candle")
 public class CandleController {
 
-    private final CandleStreamService candleStreamService;
     private final HistoricalCandleMarketService dataMarketHistoric;
 
     @Autowired
     public CandleController(
-            CandleStreamService candleStreamService,
             HistoricalCandleMarketService dataMarketHistoric
     ) {
-        this.candleStreamService = candleStreamService;
         this.dataMarketHistoric = dataMarketHistoric;
     }
 
-    @GetMapping("/minute/now")
-    public String runLogVolume() {
-        this.candleStreamService.streamLatestMinuteCandles();
-        return "Успех";
-    }
-
-    @GetMapping("/minute/disconnection")
-    public String disconnect() {
-        candleStreamService.cancelStream();
-        return "Успешная отмена подписки на свечи";
-    }
-
-    @GetMapping("minute/for-last-day")
+    @GetMapping("/minute/for-last-day")
     public Map<String, List<CustomCandle>> sendMinuteCandlesForLastDay() {
         return dataMarketHistoric.getMinuteCandlesForLastDayAllFigis();
     }
 
-    @GetMapping("minute/for-last-hour/{figi}")
+    @GetMapping("/minute/for-last-hour/{figi}")
     public List<CustomCandle> sendMinuteCandlesForLastHourByFigi(
             @PathVariable("figi") String figi
     ) {
         return dataMarketHistoric.getMinuteCandlesForLastHourByFigi(figi);
     }
 
-    @GetMapping("/day/{figi}")
-    public CustomCandle sendDayCandleCurrent(@PathVariable("figi") String figi) {
-        return dataMarketHistoric.getDayCandleCurrent(figi);
+    @GetMapping("/last-two-day/{figi}")
+    public List<CustomCandle> sendLastTwoDaysCandle(@PathVariable("figi") String figi) {
+        return dataMarketHistoric.getLastTwoDaysCandle(figi);
+    }
+
+    @GetMapping("/last-two-minute/{figi}")
+    public List<CustomCandle> sendLastTwoMinuteCandle(@PathVariable("figi") String figi) {
+        return dataMarketHistoric.getLastTwoMinuteCandle(figi);
     }
 }
 

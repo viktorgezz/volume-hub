@@ -19,8 +19,7 @@ import java.time.temporal.ChronoUnit;
 import java.util.*;
 import java.util.stream.Collectors;
 
-import static ru.tinkoff.piapi.contract.v1.CandleInterval.CANDLE_INTERVAL_1_MIN;
-import static ru.tinkoff.piapi.contract.v1.CandleInterval.CANDLE_INTERVAL_DAY;
+import static ru.tinkoff.piapi.contract.v1.CandleInterval.*;
 import static ru.tinkoff.piapi.contract.v1.InstrumentStatus.INSTRUMENT_STATUS_BASE;
 import static ru.tinkoff.piapi.core.utils.MapperUtils.mapUnitsAndNanos;
 
@@ -29,10 +28,13 @@ public class HistoricalCandleMarketServiceImpl implements HistoricalCandleMarket
 
     private static final Logger log = LoggerFactory.getLogger(HistoricalCandleMarketServiceImpl.class);
 
-    private static final int ONE_DAY_IN_MINUTES = 1440;
+    private static final int THREE_MINUTES = 3;
     private static final int ONE_HOUR_IN_MINUTES = 60;
+    private static final int ONE_DAY_IN_MINUTES = 1440;
     private static final int THREE_DAY_IN_MINUTES = 4320;
+    private static final int NUM_OF_ATTEMPTS_TO_GET_CANDLES = 30;
     private static final String CANDLE_FETCH_MESSAGE = "Получение свечи с figi {} за последние минут {}";
+    private static final String ERROR_SEARCH_CANDLE = "За промежуток времени: {}, предыдущая свеча figi {} - не найдена";
 
     private final ShareServiceImpl shareService;
 
@@ -43,16 +45,19 @@ public class HistoricalCandleMarketServiceImpl implements HistoricalCandleMarket
     @Autowired
     public HistoricalCandleMarketServiceImpl(
             ConnectTApiInvest apiInvest,
-            ShareServiceImpl shareService) {
+            ShareServiceImpl shareService
+    ) {
         this.instrumentsService = apiInvest.getInvestApi().getInstrumentsService();
         this.marketDataService = apiInvest.getInvestApi().getMarketDataService();
         this.shareService = shareService;
     }
 
-    public CustomCandle getDayCandleCurrent(String figi) {
-        LinkedList<CustomCandle> candles = new LinkedList<>(fetchIntervalCandlesByFigiAndTimeAndInterval(figi, THREE_DAY_IN_MINUTES, CANDLE_INTERVAL_DAY));
-        log.info(candles.getLast().toString());
-        return candles.getLast();
+    public List<CustomCandle> getLastTwoDaysCandle(String figi) {
+        return getLastTwoCandleByInterval(figi, THREE_DAY_IN_MINUTES, CANDLE_INTERVAL_DAY);
+    }
+
+    public List<CustomCandle> getLastTwoMinuteCandle(String figi) {
+        return getLastTwoCandleByInterval(figi, THREE_MINUTES, CANDLE_INTERVAL_1_MIN);
     }
 
     public List<CustomCandle> getMinuteCandlesForLastHourByFigi(
@@ -69,6 +74,47 @@ public class HistoricalCandleMarketServiceImpl implements HistoricalCandleMarket
                         figi -> figi,
                         figi -> fetchIntervalCandlesByFigiAndTimeAndInterval(figi, ONE_DAY_IN_MINUTES, CANDLE_INTERVAL_1_MIN)
                 ));
+    }
+
+    private List<CustomCandle> getLastTwoCandleByInterval(
+            String figi,
+            int durationMinutesBack,
+            CandleInterval interval
+    ) {
+        Set<CustomCandle> candles = new LinkedHashSet<>();
+
+        for (int attempt = 1; attempt < NUM_OF_ATTEMPTS_TO_GET_CANDLES + 1; attempt++) {
+            fetchIntervalCandlesByFigiAndTimeAndInterval(
+                    figi,
+                    durationMinutesBack * attempt,
+                    interval
+            )
+                    .stream()
+                    .sorted(Comparator.comparing(CustomCandle::time, Comparator.reverseOrder()))
+                    .limit(2)
+                    .forEach(candles::add);
+
+            if (candles.size() == 2) {
+                break;
+            } else if (candles.size() > 3) {
+                candles = candles
+                        .stream()
+                        .sorted(Comparator.comparing(CustomCandle::time, Comparator.reverseOrder()))
+                        .limit(2)
+                        .collect(Collectors.toSet());
+            }
+        }
+
+        if (candles.size() == 1) {
+            log.warn(ERROR_SEARCH_CANDLE, durationMinutesBack * NUM_OF_ATTEMPTS_TO_GET_CANDLES, figi);
+            throw new RuntimeException("За промежуток времени предыдущая свеча figi - не найдена");
+        }
+
+        log.info(candles.stream().map(candle -> candle.time().toString()).collect(Collectors.joining(", ")));
+        candles.forEach(candle ->
+                log.info("time: {}, close: {} open: {} ", candle.time(), candle.close(), candle.open())
+        );
+        return new LinkedList<>(candles);
     }
 
     private List<CustomCandle> fetchIntervalCandlesByFigiAndTimeAndInterval(String figi, int minutesBack, CandleInterval interval) {

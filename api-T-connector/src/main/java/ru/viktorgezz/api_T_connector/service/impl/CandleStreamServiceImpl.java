@@ -1,5 +1,6 @@
 package ru.viktorgezz.api_T_connector.service.impl;
 
+import io.grpc.StatusRuntimeException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -21,6 +22,8 @@ import static ru.tinkoff.piapi.core.utils.DateUtils.timestampToString;
 public class CandleStreamServiceImpl implements CandleStreamService {
 
     private static final Logger log = LoggerFactory.getLogger(CandleStreamServiceImpl.class);
+
+    private static final String message_subscription_terminated = "Подписка разорвана";
 
     private final MarketDataStreamService marketDataStreamService;
     private final RabbitMQProducerImpl producer;
@@ -80,8 +83,8 @@ public class CandleStreamServiceImpl implements CandleStreamService {
                     shareService.getAllFigis(),
                     SubscriptionInterval.SUBSCRIPTION_INTERVAL_ONE_MINUTE,
                     true);
-        } catch (Exception e) {
-            log.error("Error: {}", e.getMessage());
+        } catch (StatusRuntimeException e) {
+            log.warn(message_subscription_terminated);
         }
     }
 
@@ -89,8 +92,8 @@ public class CandleStreamServiceImpl implements CandleStreamService {
         try {
             this.streamSubscription.cancel();
             log.info("Подписка разорвана");
-        } catch (Exception e) {
-            log.error("Error: {}", e.getMessage());
+        } catch (StatusRuntimeException e) {
+            log.warn(message_subscription_terminated);
         }
     }
 }

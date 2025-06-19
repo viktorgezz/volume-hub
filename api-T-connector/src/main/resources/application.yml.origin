@@ -1,3 +1,6 @@
+server:
+  port: 8085
+
 spring:
   application:
     name: api-T-connector
@@ -24,9 +27,6 @@ spring:
       exchange: ${rabbitmq.template.exchange}
       routing-key: ${rabbitmq.template.routing-key}
 
-
-server:
-  port: 8085
 
 token:
   invest-t: ${token_t_invest}

@@ -40,8 +40,8 @@ services:
       context: ./api-T-connector
       dockerfile: Dockerfile_common
     container_name: api-app
-    ports:
-      - "8085:8085"
+    #    ports:
+    #      - "8085:8085"
     environment:
       - DATASOURCE_URL_CONNECT=${API_APP_DATASOURCE_URL_CONNECT}
       - DATASOURCE_USERNAME_CONNECT=${API_APP_DATASOURCE_USERNAME_CONNECT}
@@ -65,8 +65,8 @@ services:
       context: ./definition-of-anomaly
       dockerfile: Dockerfile_common
     container_name: define-anomaly-app
-    ports:
-      - "8090:8090"
+    #    ports:
+    #      - "8090:8090"
     environment:
       - DATASOURCE_URL=${DEFINE_ANOMALY_DATASOURCE_URL}
       - DATASOURCE_USERNAME=${DEFINE_ANOMALY_DATASOURCE_USERNAME}
@@ -79,10 +79,31 @@ services:
       - RABBITMQ_TEMPLATE_QUEUE=${DEFINE_ANOMALY_RABBITMQ_TEMPLATE_QUEUE}
       - RABBITMQ_TEMPLATE_ROUTING_KEY=${DEFINE_ANOMALY_RABBITMQ_TEMPLATE_ROUTING_KEY}
       - TELEGRAM_URI=${DEFINE_ANOMALY_TELEGRAM_URI}
-      - VOLUME_URL=${DEFINE_ANOMALY_VOLUME_URL}
+      - VOLUME_URL=${API_APP_URL}
     depends_on:
       - api-app
       - db-2
+
+  api-gateway:
+    build:
+      context: ./api-gateway
+      dockerfile: Dockerfile_common
+    container_name:
+      api-gateway
+    ports:
+      - "8080:8080"
+    environment:
+      - URI_API_APP=${API_APP_URL}
+      - URI_DEFINE_ANOMALY=${DEFINE_ANOMALY_VOLUME_URL}
+
+  app:
+    build:
+      context: ./tg_bot
+      dockerfile: Dockerfile
+    container_name:
+      app-python
+    ports:
+      - "8000:8000"
 
 volumes:
   postgres_data:

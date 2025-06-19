@@ -19,9 +19,9 @@ import java.util.Map;
 import java.util.Objects;
 
 @Component
-public class ClientTInvest implements ClientInvest {
+public class ClientRecipientTRecipientInvest implements ClientRecipientInvest {
 
-    private static final Logger log = LoggerFactory.getLogger(ClientTInvest.class);
+    private static final Logger log = LoggerFactory.getLogger(ClientRecipientTRecipientInvest.class);
 
     private static final String REQUEST_ERROR_STATUS = "Ошибка при запросе: статус {}";
     private static final String REQUEST_EXECUTION_ERROR = "Ошибка при выполнении запроса: {}";
@@ -33,7 +33,7 @@ public class ClientTInvest implements ClientInvest {
     private final RestTemplate rT;
 
     @Autowired
-    public ClientTInvest(
+    public ClientRecipientTRecipientInvest(
             RestTemplate rT,
             @Value("${service.volume.url}") String apiServiceVolume) {
         this.rT = rT;
@@ -43,7 +43,7 @@ public class ClientTInvest implements ClientInvest {
     public Map<String, List<CandleDto>> fetchMinuteCandlesForLastDay() {
         return extractResponseBodyOrThrow(rT
                 .exchange(
-                        String.format("%s/candle/minute/for-last-day", API_SERVICE_VOLUME),
+                        String.format("%s/api/v1/candle/minute/for-last-day", API_SERVICE_VOLUME),
                         HttpMethod.GET,
                         null,
                         new ParameterizedTypeReference<Map<String, List<CandleDto>>>() {
@@ -55,7 +55,19 @@ public class ClientTInvest implements ClientInvest {
     public List<CandleDto> fetchMinuteCandlesForLastHour(String figi) {
         return extractResponseBodyOrThrow(rT
                 .exchange(
-                        String.format("%s/candle/minute/for-last-hour/%s", API_SERVICE_VOLUME, figi),
+                        String.format("%s/api/v1/candle/minute/for-last-hour/%s", API_SERVICE_VOLUME, figi),
+                        HttpMethod.GET,
+                        null,
+                        new ParameterizedTypeReference<List<CandleDto>>() {
+                        }
+                )
+        );
+    }
+
+    public List<CandleDto> fetchMinuteCandlesForLastMinute(String figi) {
+        return extractResponseBodyOrThrow(rT
+                .exchange(
+                        String.format("%s/api/v1/candle/last-two-minute/%s", API_SERVICE_VOLUME, figi),
                         HttpMethod.GET,
                         null,
                         new ParameterizedTypeReference<List<CandleDto>>() {
@@ -65,14 +77,13 @@ public class ClientTInvest implements ClientInvest {
     }
 
 
-
-    public CandleDto fetchDayCandleCurr(String figi) {
+    public List<CandleDto> fetchLastTwoDaysCandle(String figi) {
         return extractResponseBodyOrThrow(rT
                 .exchange(
-                        String.format("%s/candle/day/%s", API_SERVICE_VOLUME, figi),
+                        String.format("%s/api/v1/candle/last-two-day/%s", API_SERVICE_VOLUME, figi),
                         HttpMethod.GET,
                         null,
-                        new ParameterizedTypeReference<CandleDto>() {
+                        new ParameterizedTypeReference<List<CandleDto>>() {
                         }
                 )
         );
@@ -80,14 +91,14 @@ public class ClientTInvest implements ClientInvest {
 
     public String fetchNameCompanyByFigi(String figi) {
         return rT.getForObject(
-                String.format("%s/company-name/%s", API_SERVICE_VOLUME, figi),
+                String.format("%s/api/v1/company-name/%s", API_SERVICE_VOLUME, figi),
                 String.class
         );
     }
 
     public String fetchTickerCompanyByFigi(String figi) {
         return rT.getForObject(
-                String.format("%s/company-ticker/%s", API_SERVICE_VOLUME, figi),
+                String.format("%s/api/v1/company-ticker/%s", API_SERVICE_VOLUME, figi),
                 String.class
         );
     }
@@ -97,7 +108,7 @@ public class ClientTInvest implements ClientInvest {
             return Arrays.asList(
                     Objects.requireNonNull(
                             rT.getForObject(
-                                    String.format("%s/share", API_SERVICE_VOLUME),
+                                    String.format("%s/api/v1/share", API_SERVICE_VOLUME),
                                     String[].class
                             )
                     )
@@ -113,7 +124,7 @@ public class ClientTInvest implements ClientInvest {
             return Arrays.asList(
                     Objects.requireNonNull(
                             rT.getForObject(
-                                    String.format("%s/figi", API_SERVICE_VOLUME),
+                                    String.format("%s/api/v1/figi", API_SERVICE_VOLUME),
                                     String[].class
                             )
                     )

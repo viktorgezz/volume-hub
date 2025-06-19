@@ -4,7 +4,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-import ru.viktorgezz.definition_of_anomaly.client.ClientInvest;
+import org.springframework.transaction.annotation.Transactional;
+import ru.viktorgezz.definition_of_anomaly.client.ClientRecipientInvest;
 import ru.viktorgezz.definition_of_anomaly.dao.CandleDao;
 import ru.viktorgezz.definition_of_anomaly.dao.CompanyDao;
 import ru.viktorgezz.definition_of_anomaly.dao.MetricDao;
@@ -25,7 +26,7 @@ public class CandleProcessingServiceImpl implements CandleProcessingService {
     private static final String CANDLES_PROCESSED_FOR_FIGI_COUNT = "Свечи обработаны количество figi: {}";
     private static final String COMPANY_STATS_SAVED = "Company: {} is add standard deviation: {} and average: {} in table";
 
-    private final ClientInvest clientInvest;
+    private final ClientRecipientInvest clientRecipientInvest;
     private final CompanyDao companyDao;
     private final CandleDao candleDao;
     private final MetricDao metricDao;
@@ -33,24 +34,25 @@ public class CandleProcessingServiceImpl implements CandleProcessingService {
 
     @Autowired
     public CandleProcessingServiceImpl(
-            ClientInvest clientInvest,
+            ClientRecipientInvest clientRecipientInvest,
             CompanyDao companyDao,
             CandleDao candleDao,
             MetricDao metricDao) {
-        this.clientInvest = clientInvest;
+        this.clientRecipientInvest = clientRecipientInvest;
         this.companyDao = companyDao;
         this.candleDao = candleDao;
         this.metricDao = metricDao;
     }
 
+    @Transactional
     @Override
     public void uploadCandlesForLastDay() {
-        Map<String, List<CandleDto>> figiAndCandles = clientInvest.fetchMinuteCandlesForLastDay();
+        Map<String, List<CandleDto>> figiAndCandles = clientRecipientInvest.fetchMinuteCandlesForLastDay();
         figiAndCandles
                 .keySet()
                 .forEach(figi -> {
                             if (!companyDao.isCompanyPresent(figi)) {
-                                String nameCompany = clientInvest.fetchNameCompanyByFigi(figi);
+                                String nameCompany = clientRecipientInvest.fetchNameCompanyByFigi(figi);
                                 companyDao.save(figi, nameCompany);
                                 log.info(COMPANY_ADDED_WITH_FIGI_AND_NAME, figi, nameCompany);
                             }
@@ -65,6 +67,7 @@ public class CandleProcessingServiceImpl implements CandleProcessingService {
         log.info(CANDLES_PROCESSED_FOR_FIGI_COUNT, figiAndCandles.keySet().size());
     }
 
+    @Transactional
     @Override
     public void calculateStatsMetrics() {
         companyDao

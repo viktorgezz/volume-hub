@@ -3,6 +3,7 @@ package ru.viktorgezz.api_T_connector.controller;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import ru.viktorgezz.api_T_connector.model.Share;
 import ru.viktorgezz.api_T_connector.service.interf.ShareService;
@@ -10,6 +11,7 @@ import ru.viktorgezz.api_T_connector.service.interf.ShareService;
 import java.util.List;
 
 @RestController
+@RequestMapping("/api/v1")
 public class CompanyController {
 
     private final ShareService shareService;
@@ -26,7 +28,7 @@ public class CompanyController {
         return shareService.getCompanyNameByFigi(figi);
     }
 
-    @GetMapping("company-ticker/{figi}")
+    @GetMapping("/company-ticker/{figi}")
     public String sendTickerByFigi(
             @PathVariable("figi") String figi
     ) {

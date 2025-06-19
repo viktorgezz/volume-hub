@@ -1,0 +1,7 @@
+fastapi
+uvicorn
+python-telegram-bot==20.0
+requests
+mplfinance
+matplotlib
+# json - стандартная библиотека, не требуется в requirements

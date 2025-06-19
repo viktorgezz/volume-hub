@@ -17,8 +17,7 @@ public class ClientSenderAnomalyCandleImpl implements ClientSenderAnomalyCandle 
     private static final Logger log = LoggerFactory.getLogger(ClientSenderAnomalyCandleImpl.class);
 
     private static final String STUB_FOR_EXCEPTION = "Заглушка для исключения {}";
-    private static final String ANOMALOUS_VOLUME_SENT = "Отправлен аномальный объём: {} {}";
-    private static final String ANOMALOUS_VOLUME = "Аномальный объём: {}";
+    private static final String ANOMALOUS_VOLUME = "Отправленный аномальный объём: {} {}";
 
     private final String URI_TELEGRAM;
 
@@ -40,12 +39,10 @@ public class ClientSenderAnomalyCandleImpl implements ClientSenderAnomalyCandle 
     public void send(CandleMessage candleMessage) {
         CandleAnomalyDto anomaly = converter.convertToCandleAnomalyDto(candleMessage);
         try {
-            String message = rT.postForObject(URI_TELEGRAM, anomaly, String.class);
-            log.info(ANOMALOUS_VOLUME_SENT, anomaly, message);
+            rT.postForObject(URI_TELEGRAM, anomaly, String.class);
         } catch (Exception e) {
             log.error(STUB_FOR_EXCEPTION, e.getMessage());
         }
-        log.info(ANOMALOUS_VOLUME, anomaly);
-
+        log.info(ANOMALOUS_VOLUME, anomaly.getName(), anomaly.getVolume());
     }
 }

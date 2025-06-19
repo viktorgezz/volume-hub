@@ -1,3 +1,6 @@
+server:
+  port: 8090
+
 spring:
   application:
     name: definition-of-anomaly
@@ -20,8 +23,6 @@ spring:
       exchange: ${rabbitmq.template.exchange}
       routing-key: ${rabbitmq.template.routing-key}
 
-server:
-  port: 8090
 
 service:
   volume:

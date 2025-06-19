@@ -5,7 +5,7 @@ import ru.viktorgezz.definition_of_anomaly.dto.CandleDto;
 import java.util.List;
 import java.util.Map;
 
-public interface ClientInvest {
+public interface ClientRecipientInvest {
 
     Map<String, List<CandleDto>> fetchMinuteCandlesForLastDay();
 
@@ -13,5 +13,7 @@ public interface ClientInvest {
 
     List<CandleDto> fetchMinuteCandlesForLastHour(String figi);
 
-    CandleDto fetchDayCandleCurr(String figi);
+    List<CandleDto> fetchMinuteCandlesForLastMinute(String figi);
+
+    List<CandleDto> fetchLastTwoDaysCandle(String figi);
 }

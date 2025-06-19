@@ -15,7 +15,7 @@ public class CsvToDatabase {
         this.shareService = shareService;
     }
 
-    @PostMapping("/import")
+    @PostMapping("/public/api/v1/import")
     public String importCSV() {
         return shareService.importCsvToFigisTable()
                 .orElseThrow(() -> new RuntimeException("Ошибка импорта в базу данных из csv"));

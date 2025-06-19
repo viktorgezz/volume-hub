@@ -14,9 +14,10 @@ WORKDIR /app
 
 #COPY .env .
 
-COPY --from=build /app/target/api-T-connector-0.0.1-SNAPSHOT.jar .
+COPY --from=build /app/target/api-gateway-0.0.1-SNAPSHOT.jar .
 
-EXPOSE 8085
+EXPOSE 8080
 
-CMD java -jar api-T-connector-0.0.1-SNAPSHOT.jar
+# Установка переменных окружения
+CMD  java -jar api-gateway-0.0.1-SNAPSHOT.jar
 

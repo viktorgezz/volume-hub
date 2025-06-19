@@ -1,0 +1,47 @@
+# Maven
+target/
+!target/api-T-connector-0.0.1-SNAPSHOT.jar
+*.jar
+!.mvn/wrapper/maven-wrapper.jar
+
+# IDE files
+.idea/
+.gigaide/
+*.iml
+.vscode/
+.project
+.classpath
+.settings/
+
+# Logs
+*.log
+logs/
+
+# OS generated files
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
+
+# Test files
+**/test/
+**/tests/
+**/testdata/
+
+# Documentation
+docs/
+*.md
+!README.md
+
+# Git
+.git/
+.gitignore
+
+# Temporary files
+*.tmp
+*.temp
+*.swp
+*~ 

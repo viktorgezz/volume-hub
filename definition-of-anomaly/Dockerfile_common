@@ -3,7 +3,7 @@ WORKDIR /app
 
 COPY pom.xml .
 COPY src ./src
-COPY .env .
+#COPY .env .
 
 RUN mvn dependency:go-offline -B
 
@@ -12,7 +12,7 @@ RUN mvn clean package -DskipTests
 FROM openjdk:17-jdk-slim
 WORKDIR /app
 
-COPY .env .
+#COPY .env .
 
 COPY --from=build /app/target/definition-of-anomaly-0.0.1-SNAPSHOT.jar .
 
