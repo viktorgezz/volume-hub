@@ -13,10 +13,17 @@ import org.springframework.web.client.RestClientException;
 import org.springframework.web.client.RestTemplate;
 import ru.viktorgezz.definition_of_anomaly.dto.CandleDto;
 
+import java.io.*;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.time.LocalDateTime;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
+import java.util.zip.ZipEntry;
+import java.util.zip.ZipInputStream;
 
 @Component
 public class ClientRecipientTRecipientInvest implements ClientRecipientInvest {
@@ -87,6 +94,25 @@ public class ClientRecipientTRecipientInvest implements ClientRecipientInvest {
                         }
                 )
         );
+    }
+
+    @Override
+    public void saveMinuteCandleHistoryToFile(String figi) {
+        try {
+            int currentYear = LocalDateTime.now().getYear();
+
+            byte[] zipData = rT.getForObject(
+                String.format("%s/api/historical/download?figi=%s&year=%d", 
+                    API_SERVICE_VOLUME, figi, currentYear),
+                byte[].class
+            );
+            
+
+
+        } catch (Exception e) {
+            log.error("Error while saving historical data for FIGI: {}", figi, e);
+            throw new RuntimeException("Failed to save historical data", e);
+        }
     }
 
     public String fetchNameCompanyByFigi(String figi) {

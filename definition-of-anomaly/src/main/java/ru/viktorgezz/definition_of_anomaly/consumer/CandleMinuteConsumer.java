@@ -4,6 +4,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.amqp.rabbit.annotation.RabbitListener;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Component;
 import ru.viktorgezz.definition_of_anomaly.dto.CandleMessage;
 import ru.viktorgezz.definition_of_anomaly.service.interf.CandleAnomalousService;
@@ -18,7 +19,9 @@ public class CandleMinuteConsumer {
     private final CandleAnomalousService anomalousCandle;
 
     @Autowired
-    public CandleMinuteConsumer(CandleAnomalousService anomalousCandle) {
+    public CandleMinuteConsumer(
+            @Qualifier("candleAnomalousByIrvinServiceImpl") CandleAnomalousService anomalousCandle
+    ) {
         this.anomalousCandle = anomalousCandle;
     }
 

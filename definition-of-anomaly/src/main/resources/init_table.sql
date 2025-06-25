@@ -10,6 +10,7 @@ CREATE TABLE IF NOT EXISTS metric(
     standard_deviation NUMERIC(10, 3),
     average NUMERIC(20, 6),
     z_score NUMERIC(5, 3) DEFAULT 2.99,
+    critical_value NUMERIC(20, 6),
     updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP
 );
 

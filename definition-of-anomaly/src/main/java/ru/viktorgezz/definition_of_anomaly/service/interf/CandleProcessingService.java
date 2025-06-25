@@ -5,4 +5,6 @@ public interface CandleProcessingService {
     void uploadCandlesForLastDay();
 
     void calculateStatsMetrics();
+
+    void calculateStatsMetricsByIrvin();
 }

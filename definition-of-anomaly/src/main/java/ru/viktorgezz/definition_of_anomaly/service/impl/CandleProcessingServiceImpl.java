@@ -10,6 +10,7 @@ import ru.viktorgezz.definition_of_anomaly.dao.CandleDao;
 import ru.viktorgezz.definition_of_anomaly.dao.CompanyDao;
 import ru.viktorgezz.definition_of_anomaly.dao.MetricDao;
 import ru.viktorgezz.definition_of_anomaly.dto.CandleDto;
+import ru.viktorgezz.definition_of_anomaly.model.MetricByIrvin;
 import ru.viktorgezz.definition_of_anomaly.service.interf.CandleProcessingService;
 import ru.viktorgezz.definition_of_anomaly.model.Metric;
 
@@ -25,6 +26,7 @@ public class CandleProcessingServiceImpl implements CandleProcessingService {
     private static final String CANDLE_LIST_SIZE_FOR_FIGI = "figi: {}, size list candles: {}";
     private static final String CANDLES_PROCESSED_FOR_FIGI_COUNT = "Свечи обработаны количество figi: {}";
     private static final String COMPANY_STATS_SAVED = "Company: {} is add standard deviation: {} and average: {} in table";
+    private static final String COMPANY_STATS_BY_IRVIN_SAVED = "Company: {} is add standard deviation: {}, average: {}, critical value: {} in table";
 
     private final ClientRecipientInvest clientRecipientInvest;
     private final CompanyDao companyDao;
@@ -76,7 +78,26 @@ public class CandleProcessingServiceImpl implements CandleProcessingService {
                             Metric statsMetric = candleDao.calculateStandardDeviationAndAverage(id);
                             metricDao.save(id, statsMetric);
 
-                            log.info(COMPANY_STATS_SAVED, id, statsMetric.standardDeviation(), statsMetric.average());
+                            log.info(COMPANY_STATS_SAVED, id, statsMetric.getStandardDeviation(), statsMetric.getAverage());
+                        }
+                );
+    }
+
+    @Transactional
+    @Override
+    public void calculateStatsMetricsByIrvin() {
+        companyDao
+                .getIdsCompany()
+                .forEach(id -> {
+                            Metric tempMetric = candleDao.calculateStandardDeviationAndAverage(id);
+                            MetricByIrvin newMetric = new MetricByIrvin(
+                                    tempMetric.getStandardDeviation(),
+                                    tempMetric.getAverage(),
+                                    candleDao.calculateCriticalValue(id)
+                            );
+
+                            metricDao.save(id, newMetric);
+                            log.info(COMPANY_STATS_BY_IRVIN_SAVED, id, newMetric.getStandardDeviation(), newMetric.getAverage(), newMetric.getCriticalValue());
                         }
                 );
     }

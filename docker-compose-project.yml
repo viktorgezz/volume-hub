@@ -40,8 +40,8 @@ services:
       context: ./api-T-connector
       dockerfile: Dockerfile_common
     container_name: api-app
-    #    ports:
-    #      - "8085:8085"
+    ports:
+      - "8085:8085"
     environment:
       - DATASOURCE_URL_CONNECT=${API_APP_DATASOURCE_URL_CONNECT}
       - DATASOURCE_USERNAME_CONNECT=${API_APP_DATASOURCE_USERNAME_CONNECT}
@@ -65,8 +65,8 @@ services:
       context: ./definition-of-anomaly
       dockerfile: Dockerfile_common
     container_name: define-anomaly-app
-    #    ports:
-    #      - "8090:8090"
+    ports:
+      - "8090:8090"
     environment:
       - DATASOURCE_URL=${DEFINE_ANOMALY_DATASOURCE_URL}
       - DATASOURCE_USERNAME=${DEFINE_ANOMALY_DATASOURCE_USERNAME}

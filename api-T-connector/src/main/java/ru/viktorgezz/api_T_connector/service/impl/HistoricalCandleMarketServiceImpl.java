@@ -110,17 +110,11 @@ public class HistoricalCandleMarketServiceImpl implements HistoricalCandleMarket
             throw new RuntimeException("За промежуток времени предыдущая свеча figi - не найдена");
         }
 
-        log.info(candles.stream().map(candle -> candle.time().toString()).collect(Collectors.joining(", ")));
-        candles.forEach(candle ->
-                log.info("time: {}, close: {} open: {} ", candle.time(), candle.close(), candle.open())
-        );
         return new LinkedList<>(candles);
     }
 
     private List<CustomCandle> fetchIntervalCandlesByFigiAndTimeAndInterval(String figi, int minutesBack, CandleInterval interval) {
-        List<CustomCandle> candles = getIntervalCandlesForTimeByFigi(figi, minutesBack, interval);
-        log.info("Для figi {} получено {} {} свечей", figi, candles.size(), interval.toString());
-        return candles;
+        return getIntervalCandlesForTimeByFigi(figi, minutesBack, interval);
     }
 
     private List<CustomCandle> getIntervalCandlesForTimeByFigi(

@@ -15,7 +15,7 @@ public class CandleAnomalousServiceImpl implements CandleAnomalousService {
 
     private static final Logger log = LoggerFactory.getLogger(CandleAnomalousServiceImpl.class);
 
-    private static final String ANOMALOUS_VOLUME_DETECTED = "Найден аномальный объем!!! figi: {}, volume: {}, time: {}";
+    private static final String ANOMALOUS_VOLUME_DETECTED = "Найден аномальный объем figi: {}, volume: {}, time: {}";
     private static final String COMPANY_NOT_FOUND = "Компания не была найдена в бд figi: {}, volume: {}, time: {}";
 
     private final MetricDao metricDao;
@@ -42,7 +42,7 @@ public class CandleAnomalousServiceImpl implements CandleAnomalousService {
     private boolean isAnomaly(CandleMessage candle) {
         final long idCompany = companyDao.getIdCompanyByFigi(candle.getFigi());
         if (idCompany == 0) {
-            log.error(COMPANY_NOT_FOUND, candle.getFigi(), candle.getVolume(), candle.getTime());
+            log.warn(COMPANY_NOT_FOUND, candle.getFigi(), candle.getVolume(), candle.getTime());
             return false;
         }
         return metricDao

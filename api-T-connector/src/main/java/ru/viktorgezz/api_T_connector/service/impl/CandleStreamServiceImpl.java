@@ -43,7 +43,7 @@ public class CandleStreamServiceImpl implements CandleStreamService {
     }
 
     public void streamLatestMinuteCandles() {
-        Consumer<Throwable> onErrorCallback = error -> log.error("Stream error: ", error);
+        Consumer<Throwable> onErrorCallback = error -> log.error("Ошибка stream: {}", error.getMessage());
 
         try {
             this.streamSubscription = this.marketDataStreamService

@@ -16,4 +16,6 @@ public interface ClientRecipientInvest {
     List<CandleDto> fetchMinuteCandlesForLastMinute(String figi);
 
     List<CandleDto> fetchLastTwoDaysCandle(String figi);
+
+    void saveMinuteCandleHistoryToFile(String figi);
 }

@@ -12,6 +12,7 @@ import ru.viktorgezz.definition_of_anomaly.dto.CandleDto;
 import ru.viktorgezz.definition_of_anomaly.model.Metric;
 
 import java.math.BigDecimal;
+import java.math.RoundingMode;
 import java.sql.Timestamp;
 import java.util.List;
 import java.util.Objects;
@@ -22,6 +23,7 @@ public class CandleDao {
     private static final Logger log = LoggerFactory.getLogger(CandleDao.class);
 
     private final static String NAME_TABLE_CANDLE = "candle";
+    private final static String NAME_TABLE_COMPANY = "company";
     private static final String DATA_NOT_FOUND_FOR_COMPANY_ID = "Не найдено данных для id_company:: {} {}";
     private static final String DB_ERROR_CALCULATING_STD_DEV = "Ошибка базы данных при вычислении стандартного отклонения для id_company: {} {}";
     private static final String FAILED_TO_CALCULATE_STD_DEV_DB_ERROR = "Не удалось рассчитать стандартное отклонение из-за ошибки базы данных";
@@ -48,6 +50,59 @@ public class CandleDao {
                             idCompany, c.getOpen(), c.getClose(), c.getHigh(), c.getLow(),
                             c.getVolume(), c.getTime());
                 });
+    }
+
+    public BigDecimal calculateCriticalValue(Long idCompany) {
+        final String sql = String.format("""
+                    WITH num_of_entries AS (
+                        SELECT COUNT(id) AS count 
+                        FROM %s 
+                        WHERE id_company = ?
+                    )
+                    SELECT CASE 
+                        WHEN num_of_entries.count > 1 
+                        THEN SQRT(2 * LOG10(num_of_entries.count) 
+                                  - LOG10(LOG10(num_of_entries.count)) 
+                                  - LOG10(4 * PI())) 
+                        ELSE NULL 
+                    END AS result
+                    FROM num_of_entries;
+                """, NAME_TABLE_CANDLE);
+        try {
+            return Objects
+                    .requireNonNull(jdbcTemplate.queryForObject(
+                            sql,
+                            BigDecimal.class,
+                            idCompany
+                    )).setScale(6, RoundingMode.HALF_UP);
+        } catch (EmptyResultDataAccessException | NullPointerException e) {
+            return BigDecimal.ZERO;
+        }
+    }
+
+    public BigDecimal getCalculatedAbsoluteDifference(
+            Long idCompany,
+            Long volume
+    ) {
+        final String sql = String.format("""
+                SELECT abs(? - volume)
+                FROM %s
+                WHERE id_company = ?
+                ORDER BY time DESC
+                LIMIT 1;
+                """, NAME_TABLE_CANDLE);
+
+        try {
+            return Objects.requireNonNull(
+                    jdbcTemplate.queryForObject(
+                            sql,
+                            BigDecimal.class,
+                            idCompany,
+                            volume
+                    ));
+        } catch (EmptyResultDataAccessException | NullPointerException e) {
+            return BigDecimal.ZERO;
+        }
     }
 
     public Metric calculateStandardDeviationAndAverage(Long idCompany) {

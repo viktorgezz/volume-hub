@@ -7,7 +7,7 @@ import org.springframework.web.bind.annotation.RestController;
 import ru.viktorgezz.api_T_connector.service.interf.CandleStreamService;
 
 @RestController
-@RequestMapping("/public/api/v1")
+@RequestMapping("/connector/public/api/v1")
 public class TrackingCandle {
 
     private final CandleStreamService candleStreamService;
