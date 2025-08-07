@@ -45,7 +45,18 @@ public class CompanyServiceImplTest extends AbstractIntegrationBDTest {
 
         companyService.addCompany(company);
 
-        assertThat(companyService.findNameByFigi(company.getFigi())).isEqualTo(company.getName());
+        assertThat(companyService
+                .findNameByFigi(company.getFigi()))
+                .isEqualTo(company.getName());
+    }
+
+    @Test
+    void findCompanyByTicker_MustBeFoundCompany() {
+        companyService.addCompany(company);
+
+        assertThat(companyService
+                .findCompanyByFigi(company.getFigi()))
+                .isInstanceOf(Company.class);
     }
 
     @Test

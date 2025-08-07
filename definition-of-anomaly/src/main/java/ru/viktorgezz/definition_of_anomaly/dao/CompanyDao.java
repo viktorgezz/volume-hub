@@ -13,6 +13,7 @@ public class CompanyDao {
 
     private final static String NAME_TABLE_COMPANY = "company";
     public static final String ERROR_FINDING_COMPANY_NAME_BY_FIGI = "Ошибка поиска имени компании по figi";
+    public static final String ERROR_FINDING_COMPANY_TICKER_BY_FIGI = "Ошибка поиска тикера компании по figi";
 
 
     private final JdbcTemplate jdbcTemplate;
@@ -26,11 +27,11 @@ public class CompanyDao {
         return getIdCompanyByFigi(figi) != 0;
     }
 
-    public void save(String figi, String name) {
-        final String sql = String.format("INSERT INTO %s (name, figi) values(?, ?);", NAME_TABLE_COMPANY);
+    public void save(String figi, String name, String ticker) {
+        final String sql = String.format("INSERT INTO %s (name, figi, ticker) values(?, ?, ?);", NAME_TABLE_COMPANY);
         jdbcTemplate.update(
                 sql,
-                name, figi);
+                name, figi, ticker);
     }
 
     public long getIdCompanyByFigi(String figi) {
@@ -62,6 +63,21 @@ public class CompanyDao {
     public List<Long> getIdsCompany() {
         final String sql = "Select id FROM company;";
         return jdbcTemplate.queryForList(sql, Long.class);
+    }
+
+    public String getTickerByFigi(String figi) {
+        final String sql = String.format("SELECT ticker FROM %s WHERE figi = ?;", NAME_TABLE_COMPANY);
+        try {
+            return Objects.requireNonNull(jdbcTemplate
+                    .queryForObject(
+                            sql,
+                            String.class,
+                            figi
+                    )
+            );
+        } catch (NullPointerException | EmptyResultDataAccessException e) {
+            throw new RuntimeException(ERROR_FINDING_COMPANY_NAME_BY_FIGI);
+        }
     }
 }
 

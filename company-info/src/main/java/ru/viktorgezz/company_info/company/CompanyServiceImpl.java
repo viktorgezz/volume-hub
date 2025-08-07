@@ -28,11 +28,23 @@ public class CompanyServiceImpl implements CompanyService {
     }
 
     @Override
+    public List<Company> getAllCompany() {
+        return StreamSupport
+                .stream(companyRepo.findAll().spliterator(), false)
+                .collect(Collectors.toList());
+    }
+
+    @Override
     public String findNameByFigi(String figi) {
         return Optional.ofNullable(companyRepo.getNameByFigi(figi))
                 .orElseThrow(() ->
                         new BusinessException(ErrorCode.COMPANY_NOT_FOUND)
                 );
+    }
+
+    @Override
+    public Company findCompanyByFigi(String figi) {
+        return companyRepo.getCompanyByFigi(figi);
     }
 
     @Override

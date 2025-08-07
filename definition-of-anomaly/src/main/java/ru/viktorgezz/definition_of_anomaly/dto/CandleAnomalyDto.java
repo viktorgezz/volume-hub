@@ -7,6 +7,7 @@ import java.util.List;
 public class CandleAnomalyDto {
 
     private String name;
+    private String ticker;
     private BigDecimal priceCurrent;
     private long volume;
     private BigDecimal priceDailyChangeAsPercentage;
@@ -16,6 +17,7 @@ public class CandleAnomalyDto {
 
     private CandleAnomalyDto(Builder builder) {
         this.name = builder.name;
+        this.ticker = builder.ticker;
         this.priceCurrent = builder.priceCurrent;
         this.volume = builder.volume;
         this.priceDailyChangeAsPercentage = builder.priceDailyChangeAsPercentage;
@@ -26,6 +28,7 @@ public class CandleAnomalyDto {
 
     public static class Builder {
         private String name;
+        private String ticker;
         private BigDecimal priceCurrent;
         private long volume;
         private BigDecimal priceDailyChangeAsPercentage;
@@ -35,6 +38,10 @@ public class CandleAnomalyDto {
 
         public Builder setName(String name) {
             this.name = name;
+            return this;
+        }
+        public Builder setTicker(String ticker) {
+            this.ticker = ticker;
             return this;
         }
 
@@ -79,6 +86,14 @@ public class CandleAnomalyDto {
 
     public void setName(String name) {
         this.name = name;
+    }
+
+    public String getTicker() {
+        return ticker;
+    }
+
+    public void setTicker(String ticker) {
+        this.ticker = ticker;
     }
 
     public BigDecimal getPriceCurrent() {

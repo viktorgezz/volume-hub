@@ -15,7 +15,7 @@ import json
 app = FastAPI()
 
 # Telegram настройки
-TELEGRAM_TOKEN = "8045810367:AAE85Oqz9mSZR0Vm6W_qkN-w53kY4yEKGmw"
+TELEGRAM_TOKEN = "8045810367:AAFg_MwqTCX-qJTgJFhKFf8H4HsBPFH417A"
 CHAT_IDS_FILE = "chat_ids.json"
 
 

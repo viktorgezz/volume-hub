@@ -10,6 +10,7 @@ import ru.viktorgezz.definition_of_anomaly.dao.CandleDao;
 import ru.viktorgezz.definition_of_anomaly.dao.CompanyDao;
 import ru.viktorgezz.definition_of_anomaly.dao.MetricDao;
 import ru.viktorgezz.definition_of_anomaly.dto.CandleDto;
+import ru.viktorgezz.definition_of_anomaly.dto.CompanyRsDto;
 import ru.viktorgezz.definition_of_anomaly.model.MetricByIrvin;
 import ru.viktorgezz.definition_of_anomaly.service.interf.CandleProcessingService;
 import ru.viktorgezz.definition_of_anomaly.model.Metric;
@@ -22,7 +23,7 @@ public class CandleProcessingServiceImpl implements CandleProcessingService {
 
     private static final Logger log = LoggerFactory.getLogger(CandleProcessingServiceImpl.class);
 
-    private static final String COMPANY_ADDED_WITH_FIGI_AND_NAME = "figi: {} and name: {} add in Company";
+    private static final String COMPANY_ADDED_WITH_FIGI_AND_NAME = "figi: {} and name: {} add in Company, ticker: {}";
     private static final String CANDLE_LIST_SIZE_FOR_FIGI = "figi: {}, size list candles: {}";
     private static final String CANDLES_PROCESSED_FOR_FIGI_COUNT = "Свечи обработаны количество figi: {}";
     private static final String COMPANY_STATS_SAVED = "Company: {} is add standard deviation: {} and average: {} in table";
@@ -54,15 +55,15 @@ public class CandleProcessingServiceImpl implements CandleProcessingService {
                 .keySet()
                 .forEach(figi -> {
                             if (!companyDao.isCompanyPresent(figi)) {
-                                String nameCompany = clientRecipientInvest.fetchNameCompanyByFigi(figi);
-                                companyDao.save(figi, nameCompany);
-                                log.info(COMPANY_ADDED_WITH_FIGI_AND_NAME, figi, nameCompany);
+                                CompanyRsDto company = clientRecipientInvest.fetchCompanyByFigi(figi);
+                                companyDao.save(figi, company.getName(), company.getTicker());
+                                log.info(COMPANY_ADDED_WITH_FIGI_AND_NAME, figi, company.getName(), company.getTicker());
                             }
 
                             long idCompany = companyDao.getIdCompanyByFigi(figi);
                             List<CandleDto> candleDtos = figiAndCandles.get(figi);
 
-                            candleDao.saveUniqueCandles(candleDtos, idCompany);
+                            candleDao.saveCandles(candleDtos, idCompany);
                             log.info(CANDLE_LIST_SIZE_FOR_FIGI, figi, candleDtos.size());
                         }
                 );

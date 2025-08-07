@@ -8,7 +8,11 @@ public interface CompanyService {
 
     List<String> getAllFigis();
 
+    List<Company> getAllCompany();
+
     String findNameByFigi(String figi);
+
+    Company findCompanyByFigi(String figi);
 
     Company findCompanyByTicker(String ticker);
 

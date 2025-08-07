@@ -21,11 +21,13 @@ spring:
     template:
       queue: ${rabbitmq.template.queue}
       exchange: ${rabbitmq.template.exchange}
-      routing-key: ${rabbitmq.template.routing-key}
+      routing-key: ${rabbitmq.template.routing.key}
 
 
 service:
-  volume:
-    url: ${volume-url}
+  api:
+    url: ${api.app.url}
+  guide:
+    url: ${guide.url}
   telegram:
     uri: ${telegram-uri}

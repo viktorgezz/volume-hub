@@ -5,7 +5,7 @@ import json
 import os
 
 API_URL = "http://localhost:8000/data"
-TELEGRAM_TOKEN = "8045810367:AAE85Oqz9mSZR0Vm6W_qkN-w53kY4yEKGmw"  # Замените на ваш токен бота
+TELEGRAM_TOKEN = "8045810367:AAFg_MwqTCX-qJTgJFhKFf8H4HsBPFH417A"  # Замените на ваш токен бота
 CHAT_IDS_FILE = "chat_ids.json"
 
 def load_chat_ids():

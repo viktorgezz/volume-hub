@@ -1,4 +1,4 @@
-package ru.viktorgezz.company_info;
+package ru.viktorgezz.company_info.company;
 
 import jakarta.validation.constraints.NotNull;
 import lombok.Getter;

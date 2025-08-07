@@ -13,7 +13,6 @@ import ru.viktorgezz.definition_of_anomaly.model.Metric;
 
 import java.math.BigDecimal;
 import java.math.RoundingMode;
-import java.sql.Timestamp;
 import java.util.List;
 import java.util.Objects;
 
@@ -36,14 +35,13 @@ public class CandleDao {
         this.jdbcTemplate = jdbcTemplate;
     }
 
-    public void saveUniqueCandles(List<CandleDto> candleDtos, long idCompany) {
+    public void saveCandles(List<CandleDto> candleDtos, long idCompany) {
         final String sql = String.format(
                 "INSERT INTO %s (id_company, open, close, high, low, volume, time) " +
                         "VALUES (?, ?, ?, ?, ?, ?, ?)",
                 NAME_TABLE_CANDLE);
 
-        candleDtos.stream()
-                .filter(c -> isUniqueCandleCompany(c.getTime(), idCompany))
+        candleDtos
                 .forEach(c -> {
                     jdbcTemplate.update(
                             sql,
@@ -163,17 +161,17 @@ public class CandleDao {
         }
     }
 
-    private boolean isUniqueCandleCompany(Timestamp time, long idCompany) {
-        try {
-            final String sql = String.format("SELECT id FROM %s WHERE id_company=? AND time=?", NAME_TABLE_CANDLE);
-            return jdbcTemplate.queryForObject(
-                    sql,
-                    Long.class,
-                    idCompany, time
-            ) == null;
-        } catch (EmptyResultDataAccessException e) {
-            return true;
-        }
-    }
+//    private boolean isUniqueCandleCompany(Timestamp time, long idCompany) {
+//        try {
+//            final String sql = String.format("SELECT id FROM %s WHERE id_company=? AND time=?", NAME_TABLE_CANDLE);
+//            return jdbcTemplate.queryForObject(
+//                    sql,
+//                    Long.class,
+//                    idCompany, time
+//            ) == null;
+//        } catch (EmptyResultDataAccessException e) {
+//            return true;
+//        }
+//    }
 }
 

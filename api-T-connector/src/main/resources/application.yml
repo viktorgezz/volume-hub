@@ -1,0 +1,20 @@
+server:
+  port: 8085
+
+spring:
+  application:
+    name: api-T-connector
+  rabbitmq:
+    host: ${rabbitmq.host}
+    port: ${rabbitmq.port}
+    username: ${rabbitmq.username}
+    password: ${rabbitmq.password}
+    template:
+      queue: ${rabbitmq.template.queue}
+      exchange: ${rabbitmq.template.exchange}
+      routing-key: ${rabbitmq.template.routing.key}
+
+token:
+  invest-t: ${token_t_invest}
+url:
+  guide: ${url.guide}

@@ -36,6 +36,7 @@ public class ConverterCandleMessageToAnomalyDto {
         try {
             return new CandleAnomalyDto.Builder()
                     .setName(companyDao.getNameCompanyByFigi(figi))
+                    .setTicker(companyDao.getTickerByFigi(figi))
                     .setPriceCurrent(candle.getClose())
                     .setVolume(candle.getVolume())
                     .setPriceDailyChangeAsPercentage(

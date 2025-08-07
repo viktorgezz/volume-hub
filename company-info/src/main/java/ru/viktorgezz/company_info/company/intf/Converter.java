@@ -1,8 +1,11 @@
 package ru.viktorgezz.company_info.company.intf;
 
-import ru.viktorgezz.company_info.CompanyRsDto;
+import ru.viktorgezz.company_info.company.CompanyRsDto;
 import ru.viktorgezz.company_info.company.Company;
 import ru.viktorgezz.company_info.company.CompanyRqDto;
+
+import java.util.List;
+import java.util.stream.Collectors;
 
 public interface Converter {
 
@@ -20,5 +23,12 @@ public interface Converter {
                 company.getTicker(),
                 company.getFigi()
         );
+    }
+
+    static List<CompanyRsDto> convert(List<Company> companies) {
+        return companies
+                .stream()
+                .map(Converter::convert)
+                .collect(Collectors.toList());
     }
 }

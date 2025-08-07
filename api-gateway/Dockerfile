@@ -2,10 +2,9 @@ FROM maven:3.8.3-openjdk-17 AS build
 WORKDIR /app
 
 COPY pom.xml .
-COPY src ./src
-
 RUN mvn dependency:go-offline -B
 
+COPY src ./src
 RUN mvn clean package -DskipTests
 
 FROM openjdk:17-jdk-slim
@@ -15,6 +14,4 @@ COPY --from=build /app/target/api-gateway-0.0.1-SNAPSHOT.jar .
 
 EXPOSE 8080
 
-# Установка переменных окружения
-CMD  java -jar api-gateway-0.0.1-SNAPSHOT.jar
-
+CMD java -jar api-gateway-0.0.1-SNAPSHOT.jar

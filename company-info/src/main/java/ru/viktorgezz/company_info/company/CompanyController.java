@@ -10,7 +10,6 @@ import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
-import ru.viktorgezz.company_info.CompanyRsDto;
 import ru.viktorgezz.company_info.company.intf.CompanyService;
 import ru.viktorgezz.company_info.company.intf.Converter;
 import ru.viktorgezz.company_info.exception.BusinessException;
@@ -37,6 +36,11 @@ public class CompanyController {
         return companyService.getAllFigis();
     }
 
+    @GetMapping
+    public List<CompanyRsDto> getCompanies() {
+        return Converter.convert(companyService.getAllCompany());
+    }
+
     @GetMapping("/name/{figi}")
     @Operation(summary = "Получить имя компании по FIGI", description = "Возвращает имя компании по указанному FIGI. Если компания не найдена, бросается исключение")
     @ApiResponses(value = {
@@ -50,8 +54,21 @@ public class CompanyController {
         return companyService.findNameByFigi(figi);
     }
 
-    @GetMapping("/{ticker}")
-    @Operation(summary = "Получить компанию по тикеру", description = "Возвращает полную информацию о компании по указанному тикеру")
+    @GetMapping("/{figi}")
+    @Operation(summary = "Получить компанию по figi", description = "Возвращает полную информацию о компании по указанному figi")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Компания успешно получена",
+                    content = @Content(mediaType = "application/json", schema = @Schema(implementation = CompanyRsDto.class))),
+            @ApiResponse(responseCode = "404", description = "Компания не найдена",
+                    content = @Content(mediaType = "application/json", schema = @Schema(implementation = BusinessException.class))),
+            @ApiResponse(responseCode = "500", description = "Внутренняя ошибка сервера")
+    })
+    public CompanyRsDto getCompanyByFigi(@PathVariable final String figi) {
+        return Converter.convert(companyService.findCompanyByFigi(figi));
+    }
+
+    @GetMapping("/ticker/{ticker}")
+    @Operation(summary = "Получить компанию по figi", description = "Возвращает полную информацию о компании по указанному figi")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "Компания успешно получена",
                     content = @Content(mediaType = "application/json", schema = @Schema(implementation = CompanyRsDto.class))),

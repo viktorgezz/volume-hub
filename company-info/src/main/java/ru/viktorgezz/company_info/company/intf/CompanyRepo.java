@@ -16,6 +16,11 @@ public interface CompanyRepo extends CrudRepository<Company, Long> {
 
     @Query("SELECT * " +
             "FROM moex_companies " +
+            "WHERE figi = :figi")
+    Company getCompanyByFigi(String figi);
+
+    @Query("SELECT * " +
+            "FROM moex_companies " +
             "WHERE ticker = :ticker")
     Company getCompanyByTicker(String ticker);
 
