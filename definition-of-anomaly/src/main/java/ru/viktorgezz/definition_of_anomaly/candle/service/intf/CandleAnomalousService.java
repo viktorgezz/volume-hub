@@ -1,8 +1,8 @@
 package ru.viktorgezz.definition_of_anomaly.candle.service.intf;
 
-import ru.viktorgezz.definition_of_anomaly.candle.dto.CandleMessageDto;
+import ru.viktorgezz.definition_of_anomaly.candle.model.CandleMessage;
 
 public interface CandleAnomalousService {
 
-    void foundAnomalyCandle(CandleMessageDto candle);
+    void foundAnomalyCandle(CandleMessage candle);
 }

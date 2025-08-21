@@ -1,8 +1,12 @@
-package ru.viktorgezz.definition_of_anomaly.metric;
+package ru.viktorgezz.definition_of_anomaly.metric.service.impl;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import ru.viktorgezz.definition_of_anomaly.metric.model.MetricByIrvin;
+import ru.viktorgezz.definition_of_anomaly.metric.MetricDao;
+import ru.viktorgezz.definition_of_anomaly.metric.StandardDeviationAndCriticalValue;
+import ru.viktorgezz.definition_of_anomaly.metric.service.intrf.MetricService;
 
 import java.math.BigDecimal;
 
@@ -22,26 +26,9 @@ public class MetricServiceImpl implements MetricService {
     @Transactional
     public void save(
             Long idCompany,
-            Metric statsMetric
-    ) {
-        metricDao.save(idCompany, statsMetric);
-    }
-
-    @Override
-    @Transactional
-    public void save(
-            Long idCompany,
             MetricByIrvin statsMetric
     ) {
         metricDao.save(idCompany, statsMetric);
-    }
-
-    @Override
-    public BigDecimal computeZScore(
-            long volume,
-            long idCompany
-    ) {
-        return metricDao.computeZScore(volume, idCompany);
     }
 
     @Override
@@ -52,10 +39,6 @@ public class MetricServiceImpl implements MetricService {
         return metricDao.computeAbsoluteDifference(idCompany, volume);
     }
 
-    @Override
-    public BigDecimal getZScoreFromTable(long idCompany) {
-        return metricDao.getZScoreFromTable(idCompany);
-    }
 
     @Override
     public StandardDeviationAndCriticalValue getStandardDeviationAndCriticalValue(long idCompany) {

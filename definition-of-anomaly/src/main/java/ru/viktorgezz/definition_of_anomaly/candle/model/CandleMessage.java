@@ -1,19 +1,17 @@
-package ru.viktorgezz.definition_of_anomaly.candle.dto;
-
-import ru.viktorgezz.definition_of_anomaly.candle.AbstractCandle;
+package ru.viktorgezz.definition_of_anomaly.candle.model;
 
 import java.math.BigDecimal;
 import java.sql.Timestamp;
 import java.util.Objects;
 
-public class CandleMessageDto extends AbstractCandle {
+public class CandleMessage extends AbstractCandle {
 
     private String figi;
 
-    public CandleMessageDto() {
+    public CandleMessage() {
     }
 
-    public CandleMessageDto(
+    public CandleMessage(
             String figi,
             BigDecimal open,
             BigDecimal close,
@@ -30,7 +28,7 @@ public class CandleMessageDto extends AbstractCandle {
     public boolean equals(Object o) {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
-        CandleMessageDto that = (CandleMessageDto) o;
+        CandleMessage that = (CandleMessage) o;
         return Objects.equals(figi, that.figi) && Objects.equals(time, that.time);
     }
 

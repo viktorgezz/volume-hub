@@ -138,7 +138,7 @@ public class HistoricalCandleMarketServiceImpl implements HistoricalCandleMarket
                     .collect(Collectors.toList());
         } catch (RuntimeException e) {
             log.error("Figi: {} not found. Error: {}", figi, e.getMessage());
-            throw new BusinessException(CANDLES_NOT_FOUND, figi);
+            return List.of();
         }
     }
 

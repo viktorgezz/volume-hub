@@ -8,6 +8,8 @@ import org.springframework.stereotype.Component;
 import org.springframework.web.client.RestTemplate;
 import ru.viktorgezz.definition_of_anomaly.util.ResponseExtractorUtils;
 
+import java.util.Optional;
+
 @Component
 public class CompanyClientImpl implements CompanyClient {
 
@@ -24,16 +26,21 @@ public class CompanyClientImpl implements CompanyClient {
         this.rT = rT;
     }
 
-    public CompanyRsDto fetchCompanyByFigi(String figi) {
-        return ResponseExtractorUtils.extractResponseBodyOrThrow(rT
-                .exchange(
-                        String.format("%s/company/%s", GUIDE_SERVICE_URL, figi),
-                        HttpMethod.GET,
-                        null,
-                        new ParameterizedTypeReference<CompanyRsDto>() {
-                        }
-                )
-        );
+    public Optional<CompanyRsDto> fetchCompanyByFigi(String figi) {
+        try {
+            return Optional.ofNullable(ResponseExtractorUtils.extractResponseBodyOrThrow(rT
+                            .exchange(
+                                    String.format("%s/company/%s", GUIDE_SERVICE_URL, figi),
+                                    HttpMethod.GET,
+                                    null,
+                                    new ParameterizedTypeReference<CompanyRsDto>() {
+                                    }
+                            )
+                    )
+            );
+        } catch (RuntimeException e) {
+            return Optional.empty();
+        }
     }
 
 }

@@ -6,6 +6,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Component;
+import ru.viktorgezz.definition_of_anomaly.metric.model.Metric;
+import ru.viktorgezz.definition_of_anomaly.metric.model.MetricByIrvin;
 
 import java.math.BigDecimal;
 import java.math.RoundingMode;

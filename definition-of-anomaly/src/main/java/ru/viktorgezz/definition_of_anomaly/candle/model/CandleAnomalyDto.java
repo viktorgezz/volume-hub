@@ -1,4 +1,4 @@
-package ru.viktorgezz.definition_of_anomaly.candle.dto;
+package ru.viktorgezz.definition_of_anomaly.candle.model;
 
 import java.math.BigDecimal;
 import java.sql.Timestamp;

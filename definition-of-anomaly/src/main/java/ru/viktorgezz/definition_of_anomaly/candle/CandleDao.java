@@ -4,12 +4,14 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.DataAccessException;
+import org.springframework.dao.DuplicateKeyException;
 import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.dao.IncorrectResultSizeDataAccessException;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Component;
-import ru.viktorgezz.definition_of_anomaly.candle.dto.CandleDto;
-import ru.viktorgezz.definition_of_anomaly.metric.Metric;
+import ru.viktorgezz.definition_of_anomaly.candle.model.AbstractCandle;
+import ru.viktorgezz.definition_of_anomaly.candle.model.CandleDto;
+import ru.viktorgezz.definition_of_anomaly.metric.model.Metric;
 
 import java.math.BigDecimal;
 import java.math.RoundingMode;
@@ -35,18 +37,22 @@ public class CandleDao {
     }
 
     public void saveCandles(List<CandleDto> candleDtos, long idCompany) {
-        final String sql = String.format(
-                "INSERT INTO %s (id_company, open, close, high, low, volume, time) " +
-                        "VALUES (?, ?, ?, ?, ?, ?, ?)",
-                NAME_TABLE_CANDLE);
-
         candleDtos
                 .forEach(c -> {
-                    jdbcTemplate.update(
-                            sql,
-                            idCompany, c.getOpen(), c.getClose(), c.getHigh(), c.getLow(),
-                            c.getVolume(), c.getTime());
+                    saveCandle(c, idCompany);
                 });
+    }
+
+    public void saveCandle(AbstractCandle candle, long idCompany) {
+            final String sql = String.format(
+                    "INSERT INTO %s (id_company, open, close, high, low, volume, time) " +
+                            "VALUES (?, ?, ?, ?, ?, ?, ?) " +
+                            "ON CONFLICT (id_company, time) DO NOTHING",
+                    NAME_TABLE_CANDLE);
+            jdbcTemplate.update(
+                    sql,
+                    idCompany, candle.getOpen(), candle.getClose(), candle.getHigh(), candle.getLow(),
+                    candle.getVolume(), candle.getTime());
     }
 
     public BigDecimal computeCriticalValue(Long idCompany) {

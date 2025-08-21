@@ -1,0 +1,45 @@
+global:
+  scrape_interval: 15s  # Частота сбора метрик
+  evaluation_interval: 15s  # Частота оценки правил
+
+scrape_configs:
+
+  - job_name: 'define-anomaly-app'  # Название джоба для вашего сервиса
+    metrics_path: '/actuator/prometheus'  # Путь к метрикам в Spring Boot (Actuator)
+    static_configs:
+      - targets: ['define-anomaly-app:8090']  # Имя контейнера и порт внутри Docker-сети
+    relabel_configs:  # Опционально: добавьте метки для идентификации
+      - source_labels: [__address__]
+        target_label: instance
+        replacement: define-anomaly-app
+
+  - job_name: 'api-app'  # Название джоба для вашего сервиса
+    metrics_path: '/actuator/prometheus'  # Путь к метрикам в Spring Boot (Actuator)
+    static_configs:
+      - targets: [ 'api-app:8085' ]  # Имя контейнера и порт внутри Docker-сети
+    relabel_configs: # Опционально: добавьте метки для идентификации
+      - source_labels: [ __address__ ]
+        target_label: instance
+        replacement: api-app
+
+  - job_name: 'prometheus'  # Самомониторинг Prometheus (опционально)
+    static_configs:
+      - targets: ['localhost:9090']
+
+  - job_name: 'postgres_anomaly'  # Новый джоб для PostgreSQL
+    metrics_path: '/metrics'  # Путь к метрикам в exporter
+    static_configs:
+      - targets: [ 'postgres_exporter_anomaly:9187' ]  # Имя контейнера и порт
+    relabel_configs: # Опционально: метки для идентификации
+      - source_labels: [ __address__ ]
+        target_label: instance
+        replacement: db-anomaly
+
+  - job_name: 'postgres_info'  # Новый джоб для PostgreSQL
+    metrics_path: '/metrics'  # Путь к метрикам в exporter
+    static_configs:
+      - targets: [ 'postgres_exporter_info:9187' ]  # Имя контейнера и порт
+    relabel_configs: # Опционально: метки для идентификации
+      - source_labels: [ __address__ ]
+        target_label: instance
+        replacement: db-info

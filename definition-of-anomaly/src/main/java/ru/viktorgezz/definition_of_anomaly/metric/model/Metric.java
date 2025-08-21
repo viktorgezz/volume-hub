@@ -1,4 +1,4 @@
-package ru.viktorgezz.definition_of_anomaly.metric;
+package ru.viktorgezz.definition_of_anomaly.metric.model;
 
 import java.math.BigDecimal;
 import java.math.RoundingMode;

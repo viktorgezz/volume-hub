@@ -1,6 +1,6 @@
 package ru.viktorgezz.definition_of_anomaly.candle.intf;
 
-import ru.viktorgezz.definition_of_anomaly.candle.dto.CandleDto;
+import ru.viktorgezz.definition_of_anomaly.candle.model.CandleDto;
 
 import java.util.List;
 import java.util.Map;

@@ -20,6 +20,15 @@ public class RabbitMQConfig {
     @Value("${spring.rabbitmq.template.routing-key}")
     private String routingKey;
 
+    @Value("${spring.rabbitmq.template.anomaly.queue}")
+    private String anomalyQueueName;
+
+    @Value("${spring.rabbitmq.template.anomaly.exchange}")
+    private String anomalyExchangeName;
+
+    @Value("${spring.rabbitmq.template.anomaly.routing-key}")
+    private String anomalyRoutingKey;
+
     @Value("${spring.rabbitmq.host}")
     private String host;
 
@@ -40,8 +49,23 @@ public class RabbitMQConfig {
     }
 
     @Bean
-    public Binding binding(Queue queue, TopicExchange exchange) {
-        return BindingBuilder.bind(queue).to(exchange).with(routingKey);
+    public Binding binding() {
+        return BindingBuilder.bind(queue()).to(exchange()).with(routingKey);
+    }
+
+    @Bean
+    public Queue queueAnomaly() {
+        return new Queue(anomalyQueueName, false);
+    }
+
+    @Bean
+    public TopicExchange exchangeAnomaly() {
+        return new TopicExchange(anomalyExchangeName);
+    }
+
+    @Bean
+    public Binding bindingAnomaly() {
+        return BindingBuilder.bind(queueAnomaly()).to(exchangeAnomaly()).with(anomalyRoutingKey);
     }
 
     @Bean

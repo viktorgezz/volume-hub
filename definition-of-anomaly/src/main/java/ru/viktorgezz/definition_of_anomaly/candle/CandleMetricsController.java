@@ -5,16 +5,22 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import ru.viktorgezz.definition_of_anomaly.candle.service.intf.CandleProcessingService;
+import ru.viktorgezz.definition_of_anomaly.metric.service.intrf.IrvinStatisticsCalculator;
 
 @RestController
 @RequestMapping("/anomaly/public/api/v1")
 public class CandleMetricsController {
 
     private final CandleProcessingService candleProcessing;
+    private final IrvinStatisticsCalculator irvinStatisticsCalculator;
 
     @Autowired
-    public CandleMetricsController(CandleProcessingService candleProcessing) {
+    public CandleMetricsController(
+            CandleProcessingService candleProcessing,
+            IrvinStatisticsCalculator irvinStatisticsCalculator
+    ) {
         this.candleProcessing = candleProcessing;
+        this.irvinStatisticsCalculator = irvinStatisticsCalculator;
     }
 
     @PostMapping("/upload-candles")
@@ -23,15 +29,9 @@ public class CandleMetricsController {
         return "Успех";
     }
 
-    @PostMapping("/metrics")
-    public String updateMetrics() {
-        candleProcessing.calculateStatsMetrics();
-        return "Успех";
-    }
-
     @PostMapping("/metrics-irvin")
     public String updateMetricsByIrvin() {
-        candleProcessing.calculateStatsMetricsByIrvin();
+        irvinStatisticsCalculator.calculateStatsMetricsByIrvin();
         return "Успех";
     }
 }

@@ -8,7 +8,7 @@ import org.springframework.stereotype.Component;
 import org.springframework.web.client.RestTemplate;
 import ru.viktorgezz.definition_of_anomaly.candle.intf.CandleDataClient;
 import ru.viktorgezz.definition_of_anomaly.util.ResponseExtractorUtils;
-import ru.viktorgezz.definition_of_anomaly.candle.dto.CandleDto;
+import ru.viktorgezz.definition_of_anomaly.candle.model.CandleDto;
 
 import java.util.List;
 import java.util.Map;

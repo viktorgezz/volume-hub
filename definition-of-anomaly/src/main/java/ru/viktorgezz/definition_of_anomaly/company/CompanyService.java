@@ -16,4 +16,6 @@ public interface CompanyService {
 
     String getTickerByFigi(String figi);
 
+    void loadCompanyIfNotPresent(String figi);
+
 }

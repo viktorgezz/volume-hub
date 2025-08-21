@@ -5,9 +5,9 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import ru.viktorgezz.definition_of_anomaly.candle.intf.CandleDataClient;
-import ru.viktorgezz.definition_of_anomaly.candle.dto.CandleAnomalyDto;
-import ru.viktorgezz.definition_of_anomaly.candle.dto.CandleDto;
-import ru.viktorgezz.definition_of_anomaly.candle.dto.CandleMessageDto;
+import ru.viktorgezz.definition_of_anomaly.candle.model.CandleAnomalyDto;
+import ru.viktorgezz.definition_of_anomaly.candle.model.CandleDto;
+import ru.viktorgezz.definition_of_anomaly.candle.model.CandleMessage;
 import ru.viktorgezz.definition_of_anomaly.company.CompanyService;
 
 import java.math.BigDecimal;
@@ -31,7 +31,7 @@ public class ConverterCandleMessageToAnomalyDto {
         this.companyService = companyService;
     }
 
-    public CandleAnomalyDto convertToCandleAnomalyDto(CandleMessageDto candle) {
+    public CandleAnomalyDto convertToCandleAnomalyDto(CandleMessage candle) {
         final String figi = candle.getFigi();
 
         try {
@@ -51,7 +51,6 @@ public class ConverterCandleMessageToAnomalyDto {
                     .build();
         } catch (Exception e) {
             log.error(e.getMessage());
-            System.exit(500);
             return null;
         }
     }

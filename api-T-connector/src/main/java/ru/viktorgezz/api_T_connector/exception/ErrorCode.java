@@ -4,7 +4,7 @@ import org.springframework.http.HttpStatus;
 
 public enum ErrorCode {
 
-    CANDLES_NOT_FOUND("USER_NOT_FOUND", "За промежуток времени предыдущая свеча figi: %s - не найдена", HttpStatus.NOT_FOUND),
+    CANDLES_NOT_FOUND("FIGI_NOT_FOUND", "За промежуток времени предыдущая свеча figi: %s - не найдена", HttpStatus.NOT_FOUND),
     INTERNAL_EXCEPRION("INTERNAL_EXCEPRION", "Internal error", HttpStatus.INTERNAL_SERVER_ERROR);
 
     private final String code;
@@ -13,7 +13,8 @@ public enum ErrorCode {
 
     ErrorCode(final String code,
               final String defaultMessage,
-              final HttpStatus status) {
+              final HttpStatus status
+    ) {
         this.code = code;
         this.defaultMessage = defaultMessage;
         this.status = status;

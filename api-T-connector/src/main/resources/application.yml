@@ -14,6 +14,19 @@ spring:
       exchange: ${rabbitmq.template.exchange}
       routing-key: ${rabbitmq.template.routing.key}
 
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info,metrics,prometheus
+  metrics:
+    distribution:
+      percentiles-histogram:
+        http.server.requests: true
+        jdbc.queries: true
+    tags:
+      application: api-app
+
 token:
   invest-t: ${token_t_invest}
 url:
