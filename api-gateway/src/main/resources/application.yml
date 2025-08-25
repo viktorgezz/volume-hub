@@ -15,6 +15,11 @@ spring:
           uri: ${uri.define.anomaly}
           predicates:
             - Path=/anomaly/public/api/v1/**
+        - id: guide
+          uri: ${uri.company.info}
+          predicates:
+            - Path=/company/**
+
 
 springdoc:
   api-docs:

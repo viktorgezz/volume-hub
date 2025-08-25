@@ -1,6 +1,19 @@
 version: '3.8'
 
 services:
+  api-gateway:
+    build:
+      context: ./api-gateway
+      dockerfile: Dockerfile
+    container_name:
+      api-gateway
+    ports:
+      - "8080:8080"
+    environment:
+      - URI_API_APP=${API_APP_URL}
+      - URI_DEFINE_ANOMALY=${DEFINE_ANOMALY_VOLUME_URL}
+      - URI_COMPANY_INFO=${URL_GUIDE}
+
   rabbit_mq_1:
     image: rabbitmq:4-management
     container_name: rabbit_mq_1
@@ -23,8 +36,6 @@ services:
       context: ./api-T-connector
       dockerfile: Dockerfile
     container_name: api-app
-    ports:
-      - "8085:8085"
     environment:
       - RABBITMQ_HOST=${RABBITMQ_HOST}
       - RABBITMQ_PORT=${RABBITMQ_PORT}
@@ -50,8 +61,6 @@ services:
       context: ./definition-of-anomaly
       dockerfile: Dockerfile
     container_name: define-anomaly-app
-    ports:
-      - "8090:8090"
     environment:
       - DATASOURCE_URL=${DEFINE_ANOMALY_DATASOURCE_URL}
       - DATASOURCE_USERNAME=${POSTGRES_USER_ANOMALY}
@@ -75,26 +84,12 @@ services:
       api-app:
         condition: service_healthy
 
-  api-gateway:
-    build:
-      context: ./api-gateway
-      dockerfile: Dockerfile
-    container_name:
-      api-gateway
-    ports:
-      - "8080:8080"
-    environment:
-      - URI_API_APP=${API_APP_URL}
-      - URI_DEFINE_ANOMALY=${DEFINE_ANOMALY_VOLUME_URL}
-
   guide:
     build:
       context: company-info
       dockerfile: Dockerfile
     container_name:
       guide
-    ports:
-      - "8083:8083"
     environment:
       - DATASOURCE_URL=${GUIDE_DATASOURCE_URL}
       - DATASOURCE_USERNAME=${POSTGRES_USER_INFO}
@@ -110,8 +105,6 @@ services:
       POSTGRES_USER: ${POSTGRES_USER_ANOMALY}
       POSTGRES_PASSWORD: ${POSTGRES_PASSWORD_ANOMALY}
       POSTGRES_DB: ${POSTGRES_DB_ANOMALY}
-    ports:
-      - "5433:5432"
     volumes:
       - postgres_data_anomaly:/var/lib/postgresql/data
       - ./postgre-db-anomaly.conf:/etc/postgresql/postgresql.conf
@@ -129,8 +122,6 @@ services:
       POSTGRES_USER: ${POSTGRES_USER_INFO}
       POSTGRES_PASSWORD: ${POSTGRES_PASSWORD_INFO}
       POSTGRES_DB: ${POSTGRES_DB_INFO}
-    ports:
-      - "5434:5432"
     volumes:
       - postgres_data_info:/var/lib/postgresql/data
       - ./postgre-db-info.conf:/etc/postgresql/postgresql.conf
