@@ -2,6 +2,7 @@ package ru.viktorgezz.definition_of_anomaly.candle.model;
 
 import java.math.BigDecimal;
 import java.sql.Timestamp;
+import java.util.Objects;
 
 public abstract class AbstractCandle {
     protected BigDecimal open;
@@ -21,6 +22,19 @@ public abstract class AbstractCandle {
         this.low = low;
         this.volume = volume;
         this.time = time;
+    }
+
+    @Override
+    public boolean equals(Object object) {
+        if (this == object) return true;
+        if (object == null || getClass() != object.getClass()) return false;
+        AbstractCandle that = (AbstractCandle) object;
+        return volume == that.volume && Objects.equals(open, that.open) && Objects.equals(close, that.close) && Objects.equals(high, that.high) && Objects.equals(low, that.low) && Objects.equals(time, that.time);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(open, close, high, low, volume, time);
     }
 
     public BigDecimal getOpen() {

@@ -6,22 +6,22 @@ import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.http.HttpMethod;
 import org.springframework.stereotype.Component;
 import org.springframework.web.client.RestTemplate;
-import ru.viktorgezz.definition_of_anomaly.candle.intf.CandleDataClient;
+import ru.viktorgezz.definition_of_anomaly.candle.intf.CandleApiClient;
 import ru.viktorgezz.definition_of_anomaly.util.ResponseExtractorUtils;
-import ru.viktorgezz.definition_of_anomaly.candle.model.CandleDto;
+import ru.viktorgezz.definition_of_anomaly.candle.dto.CandleDto;
 
 import java.util.List;
 import java.util.Map;
 
 @Component
-public class CandleDataClientImpl implements CandleDataClient {
+public class CandleApiClientImpl implements CandleApiClient {
 
     private final String API_SERVICE_URL;
 
     private final RestTemplate rT;
 
     @Autowired
-    public CandleDataClientImpl(
+    public CandleApiClientImpl(
             RestTemplate rT,
             @Value("${service.api.url}") String apiServiceVolume
     ) {
@@ -45,18 +45,6 @@ public class CandleDataClientImpl implements CandleDataClient {
         return ResponseExtractorUtils.extractResponseBodyOrThrow(rT
                 .exchange(
                         String.format("%s/api/v1/candle/minute/for-last-hour/%s", API_SERVICE_URL, figi),
-                        HttpMethod.GET,
-                        null,
-                        new ParameterizedTypeReference<List<CandleDto>>() {
-                        }
-                )
-        );
-    }
-
-    public List<CandleDto> fetchMinuteCandlesForLastMinute(String figi) {
-        return ResponseExtractorUtils.extractResponseBodyOrThrow(rT
-                .exchange(
-                        String.format("%s/api/v1/candle/last-two-minute/%s", API_SERVICE_URL, figi),
                         HttpMethod.GET,
                         null,
                         new ParameterizedTypeReference<List<CandleDto>>() {

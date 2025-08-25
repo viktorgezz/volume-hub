@@ -11,14 +11,14 @@ import ru.viktorgezz.definition_of_anomaly.util.ResponseExtractorUtils;
 import java.util.Optional;
 
 @Component
-public class CompanyClientImpl implements CompanyClient {
+public class CompanyApiClientImpl implements CompanyApiClient {
 
     private final String GUIDE_SERVICE_URL;
 
     private final RestTemplate rT;
 
     @Autowired
-    public CompanyClientImpl(
+    public CompanyApiClientImpl(
             @Value("${service.guide.url}") String guideServiceUrl,
             RestTemplate rT
     ) {

@@ -1,4 +1,6 @@
-package ru.viktorgezz.definition_of_anomaly.candle.model;
+package ru.viktorgezz.definition_of_anomaly.candle.dto;
+
+import ru.viktorgezz.definition_of_anomaly.candle.model.AbstractCandle;
 
 import java.math.BigDecimal;
 import java.sql.Timestamp;
@@ -20,6 +22,7 @@ public class CandleDto extends AbstractCandle {
 
 
 
+
     @Override
     public String toString() {
         return "CandleDto{" +
@@ -31,4 +34,5 @@ public class CandleDto extends AbstractCandle {
                 ", time=" + time +
                 '}';
     }
+
 }

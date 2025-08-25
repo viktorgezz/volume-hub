@@ -5,7 +5,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import ru.viktorgezz.definition_of_anomaly.candle.CandleDao;
 import ru.viktorgezz.definition_of_anomaly.candle.model.AbstractCandle;
-import ru.viktorgezz.definition_of_anomaly.candle.model.CandleDto;
+import ru.viktorgezz.definition_of_anomaly.candle.dto.CandleDto;
 import ru.viktorgezz.definition_of_anomaly.candle.service.intf.CandleService;
 
 import java.util.List;

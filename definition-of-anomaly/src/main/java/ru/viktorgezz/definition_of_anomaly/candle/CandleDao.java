@@ -4,17 +4,20 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.DataAccessException;
-import org.springframework.dao.DuplicateKeyException;
 import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.dao.IncorrectResultSizeDataAccessException;
+import org.springframework.jdbc.core.BatchPreparedStatementSetter;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Component;
 import ru.viktorgezz.definition_of_anomaly.candle.model.AbstractCandle;
-import ru.viktorgezz.definition_of_anomaly.candle.model.CandleDto;
+import ru.viktorgezz.definition_of_anomaly.candle.dto.CandleDto;
 import ru.viktorgezz.definition_of_anomaly.metric.model.Metric;
 
 import java.math.BigDecimal;
 import java.math.RoundingMode;
+import java.sql.PreparedStatement;
+import java.sql.SQLException;
+import java.sql.Timestamp;
 import java.util.List;
 import java.util.Objects;
 
@@ -37,22 +40,42 @@ public class CandleDao {
     }
 
     public void saveCandles(List<CandleDto> candleDtos, long idCompany) {
-        candleDtos
-                .forEach(c -> {
-                    saveCandle(c, idCompany);
-                });
+        final String sql = String.format(
+                "INSERT INTO %s (id_company, open, close, high, low, volume, time) " +
+                        "VALUES (?, ?, ?, ?, ?, ?, ?) " +
+                        "ON CONFLICT (id_company, time) DO NOTHING",
+                NAME_TABLE_CANDLE);
+
+        jdbcTemplate.batchUpdate(sql, new BatchPreparedStatementSetter() {
+            @Override
+            public void setValues(PreparedStatement ps, int i) throws SQLException {
+                CandleDto candle = candleDtos.get(i);
+                ps.setLong(1, idCompany);
+                ps.setBigDecimal(2, candle.getOpen());
+                ps.setBigDecimal(3, candle.getClose());
+                ps.setBigDecimal(4, candle.getHigh());
+                ps.setBigDecimal(5, candle.getLow());
+                ps.setLong(6, candle.getVolume());
+                ps.setTimestamp(7, candle.getTime());
+            }
+
+            @Override
+            public int getBatchSize() {
+                return candleDtos.size();
+            }
+        });
     }
 
     public void saveCandle(AbstractCandle candle, long idCompany) {
-            final String sql = String.format(
-                    "INSERT INTO %s (id_company, open, close, high, low, volume, time) " +
-                            "VALUES (?, ?, ?, ?, ?, ?, ?) " +
-                            "ON CONFLICT (id_company, time) DO NOTHING",
-                    NAME_TABLE_CANDLE);
-            jdbcTemplate.update(
-                    sql,
-                    idCompany, candle.getOpen(), candle.getClose(), candle.getHigh(), candle.getLow(),
-                    candle.getVolume(), candle.getTime());
+        final String sql = String.format(
+                "INSERT INTO %s (id_company, open, close, high, low, volume, time) " +
+                        "VALUES (?, ?, ?, ?, ?, ?, ?) " +
+                        "ON CONFLICT (id_company, time) DO NOTHING",
+                NAME_TABLE_CANDLE);
+        jdbcTemplate.update(
+                sql,
+                idCompany, candle.getOpen(), candle.getClose(), candle.getHigh(), candle.getLow(),
+                candle.getVolume(), candle.getTime());
     }
 
     public BigDecimal computeCriticalValue(Long idCompany) {

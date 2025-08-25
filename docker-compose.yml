@@ -147,7 +147,6 @@ services:
       dockerfile: Dockerfile
     container_name: telegram_anomaly_bot
     environment:
-      # RabbitMQ настройки
       - RABBITMQ_HOST=${RABBITMQ_HOST}
       - RABBITMQ_PORT=${RABBITMQ_PORT}
       - RABBITMQ_USERNAME=${RABBITMQ_USERNAME}
@@ -155,15 +154,11 @@ services:
       - RABBITMQ_TEMPLATE_ANOMALY_EXCHANGE=${RABBITMQ_TEMPLATE_ANOMALY_EXCHANGE}
       - RABBITMQ_TEMPLATE_ANOMALY_QUEUE=${RABBITMQ_TEMPLATE_ANOMALY_QUEUE}
       - RABBITMQ_TEMPLATE_ANOMALY_ROUTING_KEY=${RABBITMQ_TEMPLATE_ANOMALY_ROUTING_KEY}
-
-      # Telegram настройки
-      - api_telegram=${API_TELEGRAM}
-      - CHAT_IDS_FILE=/app/chat_ids.json
+      - TELEGRAM_TOKEN=${API_TELEGRAM}
+      - LOG_LEVEL=${LOG_LEVEL:-INFO}
     volumes:
-      - bot_data:/app/data
-      - bot_logs:/app/logs
-      - ./tg_bot/chat_ids.json:/app/chat_ids.json  # Прямое монтирование файла
-      # Или используйте named volume для более надежного хранения:
+      - ./tg_bot/chat_ids.json:/app/chat_ids.json
+      - ./tg_bot/logs:/app/logs
     depends_on:
       rabbit_mq_1:
         condition: service_healthy

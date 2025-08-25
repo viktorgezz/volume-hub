@@ -1,4 +1,4 @@
-package ru.viktorgezz.definition_of_anomaly.util;
+package ru.viktorgezz.definition_of_anomaly;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.CommandLineRunner;
@@ -12,7 +12,7 @@ import ru.viktorgezz.definition_of_anomaly.metric.service.intrf.MetricDynamicSer
 @ConditionalOnProperty(
         value = "custom.table-data-initializer",
         havingValue = "true",
-        matchIfMissing = false
+        matchIfMissing = true
 )
 public class TableDataInitializer implements CommandLineRunner {
 

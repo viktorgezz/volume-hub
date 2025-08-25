@@ -1,8 +1,9 @@
-package ru.viktorgezz.definition_of_anomaly.candle.model;
+package ru.viktorgezz.definition_of_anomaly.candle.dto;
 
 import java.math.BigDecimal;
 import java.sql.Timestamp;
 import java.util.List;
+import java.util.Set;
 
 public class CandleAnomalyDto {
 
@@ -13,7 +14,7 @@ public class CandleAnomalyDto {
     private BigDecimal priceDailyChangeAsPercentage;
     private BigDecimal priceMinuteChangeAsPercentage;
     private Timestamp time;
-    private List<CandleDto> candlesLastHour;
+    private Set<CandleDto> candlesLastHour;
 
     private CandleAnomalyDto(Builder builder) {
         this.name = builder.name;
@@ -34,7 +35,7 @@ public class CandleAnomalyDto {
         private BigDecimal priceDailyChangeAsPercentage;
         private BigDecimal priceMinuteChangeAsPercentage;
         private Timestamp time;
-        private List<CandleDto> candlesLastHour;
+        private Set<CandleDto> candlesLastHour;
 
         public Builder setName(String name) {
             this.name = name;
@@ -70,7 +71,7 @@ public class CandleAnomalyDto {
             return this;
         }
 
-        public Builder setCandlesLastHour(List<CandleDto> candlesLastHour) {
+        public Builder setCandlesLastHour(Set<CandleDto> candlesLastHour) {
             this.candlesLastHour = candlesLastHour;
             return this;
         }
@@ -136,11 +137,11 @@ public class CandleAnomalyDto {
         this.time = time;
     }
 
-    public List<CandleDto> getCandlesLastHour() {
+    public Set<CandleDto> getCandlesLastHour() {
         return candlesLastHour;
     }
 
-    public void setCandlesLastHour(List<CandleDto> candlesLastHour) {
+    public void setCandlesLastHour(Set<CandleDto> candlesLastHour) {
         this.candlesLastHour = candlesLastHour;
     }
 }

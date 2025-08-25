@@ -15,15 +15,15 @@ public class CompanyServiceImpl implements CompanyService {
     private static final Logger log = LoggerFactory.getLogger(CompanyServiceImpl.class);
 
     private final CompanyDao companyDao;
-    private final CompanyClient companyClient;
+    private final CompanyApiClient companyApiClient;
 
     @Autowired
     public CompanyServiceImpl(
             CompanyDao companyDao,
-            CompanyClient companyClient
+            CompanyApiClient companyApiClient
     ) {
         this.companyDao = companyDao;
-        this.companyClient = companyClient;
+        this.companyApiClient = companyApiClient;
     }
 
     @Override
@@ -65,7 +65,7 @@ public class CompanyServiceImpl implements CompanyService {
     @Transactional
     public void loadCompanyIfNotPresent(String figi) {
         if (!isCompanyPresent(figi)) {
-            CompanyRsDto company = companyClient.fetchCompanyByFigi(figi).orElseThrow();
+            CompanyRsDto company = companyApiClient.fetchCompanyByFigi(figi).orElseThrow();
             log.info(COMPANY_ADDED_WITH_FIGI_AND_NAME, figi, company.getName(), company.getTicker());
             save(figi, company.getName(), company.getTicker());
         }

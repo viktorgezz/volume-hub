@@ -30,26 +30,6 @@ public class MetricDao {
 
     public void save(
             Long idCompany,
-            Metric statsMetric
-    ) {
-        final String sql = String.format("INSERT INTO %s (id_company, standard_deviation, average, updated_at) " +
-                        "VALUES (?, ?, ?, ?) " +
-                        "ON CONFLICT (id_company) " +
-                        "DO UPDATE SET " +
-                        "standard_deviation = EXCLUDED.standard_deviation, " +
-                        "updated_at = CURRENT_TIMESTAMP, " +
-                        "average = EXCLUDED.average;",
-                NAME_TABLE_METRIC
-        );
-        jdbcTemplate.update(
-                sql,
-                idCompany, statsMetric.getStandardDeviation(),
-                statsMetric.getAverage(), Timestamp.valueOf(LocalDateTime.now())
-        );
-    }
-
-    public void save(
-            Long idCompany,
             MetricByIrvin statsMetric
     ) {
         final String sql = String.format("INSERT INTO %s (id_company, standard_deviation, average, updated_at, critical_value) " +
@@ -70,18 +50,6 @@ public class MetricDao {
                 Timestamp.valueOf(LocalDateTime.now()),
                 statsMetric.getCriticalValue()
         );
-    }
-
-    public BigDecimal computeZScore(long volume, long idCompany) {
-        final String sql = String.format(
-                "SELECT COALESCE((? - average) / NULLIF(standard_deviation, 0), 0) " +
-                        "FROM %s " +
-                        "WHERE id_company = ?; ",
-                NAME_TABLE_METRIC);
-        return Objects
-                .requireNonNull(jdbcTemplate
-                        .queryForObject(sql, BigDecimal.class, volume, idCompany))
-                .setScale(3, RoundingMode.HALF_UP);
     }
 
     public BigDecimal computeAbsoluteDifference(
@@ -106,15 +74,6 @@ public class MetricDao {
             log.warn("error message: {}", e.getMessage());
             return BigDecimal.ZERO;
         }
-    }
-
-    public BigDecimal getZScoreFromTable(long idCompany) {
-        final String sql = String.format("SELECT z_score FROM %s WHERE id_company = ?;",
-                NAME_TABLE_METRIC);
-        return Objects
-                .requireNonNull(jdbcTemplate
-                        .queryForObject(sql, BigDecimal.class, idCompany))
-                .setScale(3, RoundingMode.HALF_UP);
     }
 
     public BigDecimal getStandardDeviation(long idCompany) {

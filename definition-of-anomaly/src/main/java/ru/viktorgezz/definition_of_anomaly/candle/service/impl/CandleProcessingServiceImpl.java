@@ -5,9 +5,9 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import ru.viktorgezz.definition_of_anomaly.candle.intf.CandleDataClient;
+import ru.viktorgezz.definition_of_anomaly.candle.intf.CandleApiClient;
 import ru.viktorgezz.definition_of_anomaly.candle.service.intf.CandleService;
-import ru.viktorgezz.definition_of_anomaly.candle.model.CandleDto;
+import ru.viktorgezz.definition_of_anomaly.candle.dto.CandleDto;
 import ru.viktorgezz.definition_of_anomaly.company.CompanyService;
 import ru.viktorgezz.definition_of_anomaly.candle.service.intf.CandleProcessingService;
 
@@ -22,7 +22,7 @@ public class CandleProcessingServiceImpl implements CandleProcessingService {
     private static final String CANDLE_LIST_SIZE_FOR_FIGI = "figi: {}, size list candles: {}";
     private static final String CANDLES_PROCESSED_FOR_FIGI_COUNT = "Свечи обработаны количество figi: {}";
 
-    private final CandleDataClient candleDataClient;
+    private final CandleApiClient candleApiClient;
 
     private final CandleService candleService;
     private final CompanyService companyService;
@@ -30,11 +30,11 @@ public class CandleProcessingServiceImpl implements CandleProcessingService {
 
     @Autowired
     public CandleProcessingServiceImpl(
-            CandleDataClient candleDataClient,
+            CandleApiClient candleApiClient,
             CandleService candleService,
             CompanyService companyService
     ) {
-        this.candleDataClient = candleDataClient;
+        this.candleApiClient = candleApiClient;
         this.candleService = candleService;
         this.companyService = companyService;
     }
@@ -42,7 +42,7 @@ public class CandleProcessingServiceImpl implements CandleProcessingService {
     @Transactional
     @Override
     public void uploadCandlesForLastDay() {
-        Map<String, List<CandleDto>> figiAndCandles = candleDataClient.fetchMinuteCandlesForLastDay();
+        Map<String, List<CandleDto>> figiAndCandles = candleApiClient.fetchMinuteCandlesForLastDay();
         figiAndCandles
                 .keySet()
                 .forEach(figi -> {
@@ -52,7 +52,7 @@ public class CandleProcessingServiceImpl implements CandleProcessingService {
                                 candleService.saveCandles(
                                         candleDtos,
                                         companyService.getIdCompanyByFigi(figi)
-                                ); // исправить сохранение свечей, чтобы не уникальные не добавлялись и чтобы не ломалась транзакция
+                                );
 
                                 log.info(CANDLE_LIST_SIZE_FOR_FIGI, figi, candleDtos.size());
                             } catch (RuntimeException e) {

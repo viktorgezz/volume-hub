@@ -4,7 +4,7 @@ import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
-import ru.viktorgezz.definition_of_anomaly.candle.model.CandleAnomalyDto;
+import ru.viktorgezz.definition_of_anomaly.candle.dto.CandleAnomalyDto;
 
 @Component
 public class CandleAnomalyProducer {
