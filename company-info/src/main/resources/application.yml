@@ -1,0 +1,28 @@
+server:
+  port: 8083
+
+spring:
+  application:
+    name: company-info
+  datasource:
+    url: ${datasource.url}
+    username: ${datasource.username}
+    password: ${datasource.password}
+    driver-class-name: org.postgresql.Driver
+  flyway:
+    enabled: true
+    locations:
+      - classpath:db
+    datasource:
+      url: ${datasource.url}
+      username: ${datasource.username}
+      password: ${datasource.password}
+
+springdoc:
+  api-docs:
+    path: /v3/api-docs
+    enabled: true
+  pathsToMatch: /company/**
+  packagesToScan: ru.viktorgezz.company_info
+  default-consumes-media-type: application/json
+  default-produces-media-type: application/json

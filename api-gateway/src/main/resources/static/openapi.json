@@ -23,24 +23,6 @@
         }
       }
     },
-    "/anomaly/public/api/v1/metrics": {
-      "post": {
-        "summary": "Обновление статистических метрик объёма",
-        "description": "Вычисляет и обновляет метрики по объёму торгов для компаний. Расчёты выполняются по минутным свечам за всё время, сохранённое в базе данных. Используется следующая логика:\n\n- Объёмы торгов разбиваются на квартильные группы с помощью NTILE(4).\n- Из анализа исключаются крайние квартильные группы (1 и 4), чтобы минимизировать влияние выбросов.\n- По оставшимся данным вычисляются:\n  - Среднее значение объёма\n  - Среднеквадратичное отклонение относительно этого среднего\n\nМетрики сохраняются или возвращаются как часть объекта со следующими полями:\n\n- `avg_volume`: Средний объём торгов (без учёта выбросов)\n- `standard_deviation`: Среднеквадратичное отклонение объёма\n\nЕсли данных недостаточно, возвращаются значения по умолчанию (0.00).",
-        "responses": {
-          "200": {
-            "description": "Метрики успешно вычислены и обновлены.",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "type": "string"
-                }
-              }
-            }
-          }
-        }
-      }
-    },
     "/anomaly/public/api/v1/metrics-irvin": {
       "post": {
         "summary": "Обновление статистических метрик объёма по новой мат модели",
@@ -48,24 +30,6 @@
         "responses": {
           "200": {
             "description": "Метрики успешно вычислены и обновлены.",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "type": "string"
-                }
-              }
-            }
-          }
-        }
-      }
-    },
-    "/anomaly/public/api/v1/import": {
-      "post": {
-        "summary": "Импорт компаний из CSV-файла",
-        "description": "Обновляет in-memory базу данных компаний на основе содержимого файла `figi.csv`. Каждая строка файла должна содержать три поля: название компании, FIGI и тикер. Перед добавлением данных выполняется проверка на уникальность по каждому из полей (`figi`, `company`, `ticker`). Если совпадения не найдено — компания добавляется в таблицу `_share`. В случае ошибок в формате строк (например, менее трёх полей), импорт прерывается.\n\nДля добавления новых компаний необходимо предварительно изменить файл `figi.csv`, дополнив его актуальными данными.",
-        "responses": {
-          "200": {
-            "description": "Данные успешно импортированы в базу.",
             "content": {
               "application/json": {
                 "schema": {
@@ -101,7 +65,7 @@
         "description": "Завершает ранее запущенный процесс отслеживания минутных свечей в реальном времени, инициированный через эндпоинт `/public/api/v1/minute/now`. После вызова этого метода подписка на поток рыночных данных закрывается, и новые свечи больше не поступают в систему обработки и анализа аномалий.",
         "responses": {
           "200": {
-            "description": "Процесс отслеживания свечей успешно остановлен.",
+            "description": "Процесс отслеживания свечей он успешно остановлен.",
             "content": {
               "application/json": {
                 "schema": {
@@ -112,7 +76,534 @@
           }
         }
       }
+    },
+    "/company/figi": {
+      "get": {
+        "summary": "Получить все FIGI",
+        "description": "Возвращает список всех доступных FIGI компаний из базы данных",
+        "tags": ["Company"],
+        "responses": {
+          "200": {
+            "description": "Список FIGI успешно получен",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "type": "string"
+                  }
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Внутренняя ошибка сервера",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/BusinessException"
+                }
+              }
+            }
+          }
+        }
+      },
+      "patch": {
+        "summary": "Обновить FIGI по тикеру",
+        "description": "Обновляет FIGI компании по указанному тикеру. Если компания не найдена, бросается исключение",
+        "tags": ["Company"],
+        "parameters": [
+          {
+            "name": "figi",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "ticker",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "FIGI успешно обновлён",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Компания не найдена",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/BusinessException"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Внутренняя ошибка сервера",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/BusinessException"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/company": {
+      "get": {
+        "summary": "Получить все компании",
+        "description": "Возвращает список всех компаний из базы данных",
+        "tags": ["Company"],
+        "responses": {
+          "200": {
+            "description": "Список компаний успешно получен",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/CompanyRsDto"
+                  }
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Внутренняя ошибка сервера",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/BusinessException"
+                }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "summary": "Добавить новую компанию",
+        "description": "Добавляет новую компанию в базу данных на основе DTO. Возвращает сообщение об успехе",
+        "tags": ["Company"],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CompanyRqDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Компания успешно добавлена",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Неверные входные данные (валидация не пройдена)",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/BusinessException"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Внутренняя ошибка сервера",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/BusinessException"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/company/name/{figi}": {
+      "get": {
+        "summary": "Получить имя компании по FIGI",
+        "description": "Возвращает имя компании по указанному FIGI. Если компания не найдена, бросается исключение",
+        "tags": ["Company"],
+        "parameters": [
+          {
+            "name": "figi",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Имя компании успешно получено",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Компания не найдена",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/BusinessException"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Внутренняя ошибка сервера",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/BusinessException"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/company/{figi}": {
+      "get": {
+        "summary": "Получить компанию по FIGI",
+        "description": "Возвращает полную информацию о компании по указанному FIGI",
+        "tags": ["Company"],
+        "parameters": [
+          {
+            "name": "figi",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Компания успешно получена",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CompanyRsDto"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Компания не найдена",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/BusinessException"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Внутренняя ошибка сервера",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/BusinessException"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/company/ticker/{ticker}": {
+      "get": {
+        "summary": "Получить компанию по тикеру",
+        "description": "Возвращает полную информацию о компании по указанному тикеру",
+        "tags": ["Company"],
+        "parameters": [
+          {
+            "name": "ticker",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Компания успешно получена",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CompanyRsDto"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Компания не найдена",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/BusinessException"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Внутренняя ошибка сервера",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/BusinessException"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/company/{ticker}": {
+      "delete": {
+        "summary": "Удалить компанию по тикеру",
+        "description": "Удаляет компанию по указанному тикеру. Если компания не найдена, бросается исключение",
+        "tags": ["Company"],
+        "parameters": [
+          {
+            "name": "ticker",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Компания успешно удалена",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Компания не найдена",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/BusinessException"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Внутренняя ошибка сервера",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/BusinessException"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/company/name": {
+      "patch": {
+        "summary": "Обновить имя по тикеру",
+        "description": "Обновляет имя компании по указанному тикеру. Если компания не найдена, бросается исключение",
+        "tags": ["Company"],
+        "parameters": [
+          {
+            "name": "name",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "ticker",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Имя успешно обновлено",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Компания не найдена",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/BusinessException"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Внутренняя ошибка сервера",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/BusinessException"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/company/ticker": {
+      "patch": {
+        "summary": "Обновить тикер",
+        "description": "Обновляет тикер компании с старого на новый. Если компания не найдена, бросается исключение",
+        "tags": ["Company"],
+        "parameters": [
+          {
+            "name": "oldTicker",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "newTicker",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Тикер успешно обновлён",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Компания не найдена",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/BusinessException"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Внутренняя ошибка сервера",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/BusinessException"
+                }
+              }
+            }
+          }
+        }
+      }
     }
   },
-  "components": {}
+  "components": {
+    "schemas": {
+      "CompanyRsDto": {
+        "type": "object",
+        "required": ["name", "ticker", "figi"],
+        "properties": {
+          "name": {
+            "type": "string",
+            "description": "Название компании"
+          },
+          "ticker": {
+            "type": "string",
+            "description": "Тикер компании"
+          },
+          "figi": {
+            "type": "string",
+            "description": "FIGI компании"
+          }
+        }
+      },
+      "CompanyRqDto": {
+        "type": "object",
+        "required": ["name", "ticker", "figi"],
+        "properties": {
+          "name": {
+            "type": "string",
+            "maxLength": 300,
+            "description": "Название компании (максимум 300 символов)"
+          },
+          "ticker": {
+            "type": "string",
+            "maxLength": 8,
+            "description": "Тикер компании (максимум 8 символов)"
+          },
+          "figi": {
+            "type": "string",
+            "maxLength": 15,
+            "description": "FIGI компании (максимум 15 символов)"
+          }
+        }
+      },
+      "BusinessException": {
+        "type": "object",
+        "properties": {
+          "message": {
+            "type": "string",
+            "description": "Сообщение об ошибке"
+          }
+        }
+      }
+    }
+  }
 }

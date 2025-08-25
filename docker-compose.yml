@@ -1,0 +1,217 @@
+version: '3.8'
+
+services:
+  api-gateway:
+    build:
+      context: ./api-gateway
+      dockerfile: Dockerfile
+    container_name:
+      api-gateway
+    ports:
+      - "8080:8080"
+    environment:
+      - URI_API_APP=${API_APP_URL}
+      - URI_DEFINE_ANOMALY=${DEFINE_ANOMALY_VOLUME_URL}
+      - URI_COMPANY_INFO=${URL_GUIDE}
+
+  rabbit_mq_1:
+    image: rabbitmq:4-management
+    container_name: rabbit_mq_1
+    ports:
+      - "5672:5672"
+      - "15672:15672"
+    volumes:
+      - rabbitmq_data:/var/lib/rabbitmq
+    environment:
+      - RABBITMQ_DEFAULT_USER=${RABBITMQ_USERNAME}
+      - RABBITMQ_DEFAULT_PASS=${RABBITMQ_PASSWORD}
+    healthcheck:
+      test: [ "CMD", "rabbitmqctl", "status" ]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+
+  api-app:
+    build:
+      context: ./api-T-connector
+      dockerfile: Dockerfile
+    container_name: api-app
+    environment:
+      - RABBITMQ_HOST=${RABBITMQ_HOST}
+      - RABBITMQ_PORT=${RABBITMQ_PORT}
+      - RABBITMQ_USERNAME=${RABBITMQ_USERNAME}
+      - RABBITMQ_PASSWORD=${RABBITMQ_PASSWORD}
+      - RABBITMQ_TEMPLATE_QUEUE=${RABBITMQ_TEMPLATE_QUEUE}
+      - RABBITMQ_TEMPLATE_EXCHANGE=${RABBITMQ_TEMPLATE_EXCHANGE}
+      - RABBITMQ_TEMPLATE_ROUTING_KEY=${RABBITMQ_TEMPLATE_ROUTING_KEY}
+      - TOKEN_T_INVEST=${API_APP_TOKEN_T_INVEST}
+      - URL_GUIDE=${URL_GUIDE}
+    healthcheck:
+      test: "wget -T5 -qO- http://localhost:8085/actuator/health | grep UP || exit 1"
+      interval: 20s
+      timeout: 5s
+      retries: 6
+      start_period: 40s
+    depends_on:
+      rabbit_mq_1:
+        condition: service_healthy
+
+  define-anomaly-app:
+    build:
+      context: ./definition-of-anomaly
+      dockerfile: Dockerfile
+    container_name: define-anomaly-app
+    environment:
+      - DATASOURCE_URL=${DEFINE_ANOMALY_DATASOURCE_URL}
+      - DATASOURCE_USERNAME=${POSTGRES_USER_ANOMALY}
+      - DATASOURCE_PASSWORD=${POSTGRES_PASSWORD_ANOMALY}
+      - RABBITMQ_HOST=${RABBITMQ_HOST}
+      - RABBITMQ_PORT=${RABBITMQ_PORT}
+      - RABBITMQ_USERNAME=${RABBITMQ_USERNAME}
+      - RABBITMQ_PASSWORD=${RABBITMQ_PASSWORD}
+      - RABBITMQ_TEMPLATE_EXCHANGE=${RABBITMQ_TEMPLATE_EXCHANGE}
+      - RABBITMQ_TEMPLATE_QUEUE=${RABBITMQ_TEMPLATE_QUEUE}
+      - RABBITMQ_TEMPLATE_ROUTING_KEY=${RABBITMQ_TEMPLATE_ROUTING_KEY}
+      - RABBITMQ_TEMPLATE_ANOMALY_EXCHANGE=${RABBITMQ_TEMPLATE_ANOMALY_EXCHANGE}
+      - RABBITMQ_TEMPLATE_ANOMALY_QUEUE=${RABBITMQ_TEMPLATE_ANOMALY_QUEUE}
+      - RABBITMQ_TEMPLATE_ANOMALY_ROUTING_KEY=${RABBITMQ_TEMPLATE_ANOMALY_ROUTING_KEY}
+      - TELEGRAM_URI=${DEFINE_ANOMALY_TELEGRAM_URI}
+      - API_APP_URL=${API_APP_URL}
+      - GUIDE_URL=${URL_GUIDE}
+    depends_on:
+      db-anomaly:
+        condition: service_healthy
+      api-app:
+        condition: service_healthy
+
+  guide:
+    build:
+      context: company-info
+      dockerfile: Dockerfile
+    container_name:
+      guide
+    environment:
+      - DATASOURCE_URL=${GUIDE_DATASOURCE_URL}
+      - DATASOURCE_USERNAME=${POSTGRES_USER_INFO}
+      - DATASOURCE_PASSWORD=${POSTGRES_PASSWORD_INFO}
+    depends_on:
+      db-info:
+        condition: service_healthy
+
+  db-anomaly:
+    image: postgres:15
+    container_name: db-anomaly
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER_ANOMALY}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD_ANOMALY}
+      POSTGRES_DB: ${POSTGRES_DB_ANOMALY}
+    volumes:
+      - postgres_data_anomaly:/var/lib/postgresql/data
+      - ./postgre-db-anomaly.conf:/etc/postgresql/postgresql.conf
+    command: postgres -c config_file=/etc/postgresql/postgresql.conf
+    healthcheck:
+      test: [ "CMD", "pg_isready", "-U", "${POSTGRES_USER_ANOMALY}" ]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  db-info:
+    image: postgres:15
+    container_name: db-info
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER_INFO}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD_INFO}
+      POSTGRES_DB: ${POSTGRES_DB_INFO}
+    volumes:
+      - postgres_data_info:/var/lib/postgresql/data
+      - ./postgre-db-info.conf:/etc/postgresql/postgresql.conf
+    command: postgres -c config_file=/etc/postgresql/postgresql.conf
+    healthcheck:
+      test: [ "CMD", "pg_isready", "-U", "${POSTGRES_USER_INFO}" ]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  telegram-anomaly-bot:
+    build:
+      context: ./tg_bot
+      dockerfile: Dockerfile
+    container_name: telegram_anomaly_bot
+    environment:
+      - RABBITMQ_HOST=${RABBITMQ_HOST}
+      - RABBITMQ_PORT=${RABBITMQ_PORT}
+      - RABBITMQ_USERNAME=${RABBITMQ_USERNAME}
+      - RABBITMQ_PASSWORD=${RABBITMQ_PASSWORD}
+      - RABBITMQ_TEMPLATE_ANOMALY_EXCHANGE=${RABBITMQ_TEMPLATE_ANOMALY_EXCHANGE}
+      - RABBITMQ_TEMPLATE_ANOMALY_QUEUE=${RABBITMQ_TEMPLATE_ANOMALY_QUEUE}
+      - RABBITMQ_TEMPLATE_ANOMALY_ROUTING_KEY=${RABBITMQ_TEMPLATE_ANOMALY_ROUTING_KEY}
+      - TELEGRAM_TOKEN=${API_TELEGRAM}
+      - LOG_LEVEL=${LOG_LEVEL:-INFO}
+    volumes:
+      - ./tg_bot/chat_ids.json:/app/chat_ids.json
+      - ./tg_bot/logs:/app/logs
+    depends_on:
+      rabbit_mq_1:
+        condition: service_healthy
+
+  prometheus:
+    image: prom/prometheus:v3.5.0
+    container_name: prometheus
+    volumes:
+      - ./prometheus.yml:/etc/prometheus/prometheus.yml
+      - prometheus-data:/prometheus
+    command:
+      - '--config.file=/etc/prometheus/prometheus.yml'
+      - '--storage.tsdb.path=/prometheus'
+      - '--web.console.libraries=/usr/share/prometheus/console_libraries'
+      - '--web.console.templates=/usr/share/prometheus/consoles'
+    ports:
+      - "9090:9090"  # UI Prometheus
+
+  grafana:
+    image: grafana/grafana:12.1.0
+    container_name: grafana
+    volumes:
+      - grafana-data:/var/lib/grafana  # Хранение дашбордов
+    ports:
+      - "3000:3000"  # UI Grafana
+    environment:
+      - GF_SECURITY_ADMIN_USER=admin  # Имя администратора
+      - GF_SECURITY_ADMIN_PASSWORD=strongpassword123
+      - GF_AUTH_TOKEN_ROTATION_INTERVAL_MINUTES=30
+      - GF_SERVER_ROOT_URL=http://localhost:3000  # Яв
+      - GF_DATABASE_TYPE=sqlite3
+    depends_on:
+      - prometheus
+
+  postgres_exporter_anomaly:
+    image: prometheuscommunity/postgres-exporter:v0.17.0
+    container_name: postgres_exporter_anomaly
+    environment:
+      - DATA_SOURCE_NAME=postgresql://${POSTGRES_USER_ANOMALY}:${POSTGRES_PASSWORD_ANOMALY}@db-anomaly:5432/${POSTGRES_DB_ANOMALY}?sslmode=disable
+    ports:
+      - "9187:9187"
+    depends_on:
+      db-anomaly:
+        condition: service_healthy
+
+  postgres_exporter_info:
+    image: prometheuscommunity/postgres-exporter:v0.17.0
+    container_name: postgres_exporter_info
+    environment:
+      - DATA_SOURCE_NAME=postgresql://${POSTGRES_USER_INFO}:${POSTGRES_PASSWORD_INFO}@db-info:5432/${POSTGRES_DB_INFO}?sslmode=disable
+    ports:
+      - "9188:9187"
+    depends_on:
+      db-info:
+        condition: service_healthy
+
+volumes:
+  postgres_data_anomaly:
+  postgres_data_info:
+  rabbitmq_data:
+  prometheus-data:
+  grafana-data:
+  bot_data:
+  bot_logs:
+  bot_chat_ids:

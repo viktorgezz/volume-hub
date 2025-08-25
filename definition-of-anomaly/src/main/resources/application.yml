@@ -1,0 +1,55 @@
+server:
+  port: 8090
+
+spring:
+  application:
+    name: definition-of-anomaly
+  datasource:
+    url: ${datasource.url}
+    username: ${datasource.username}
+    password: ${datasource.password}
+    driver-class-name: org.postgresql.Driver
+  sql:
+    init:
+      mode: always
+      schema-locations: classpath:init_table.sql
+  rabbitmq:
+    host: ${rabbitmq.host}
+    port: ${rabbitmq.port}
+    username: ${rabbitmq.username}
+    password: ${rabbitmq.password}
+    template:
+      queue: ${rabbitmq.template.queue}
+      exchange: ${rabbitmq.template.exchange}
+      routing-key: ${rabbitmq.template.routing.key}
+      anomaly:
+        queue: ${rabbitmq.template.anomaly.queue}
+        exchange: ${rabbitmq.template.anomaly.exchange}
+        routing-key: ${rabbitmq.template.anomaly.routing.key}
+
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info,metrics,prometheus
+  metrics:
+    enable:
+      jdbc: true
+    distribution:
+      percentiles-histogram:
+        http.server.requests: true
+        jdbc.queries: true
+    tags:
+      application: define-anomaly-app
+
+service:
+  api:
+    url: ${api.app.url}
+  guide:
+    url: ${guide.url}
+  telegram:
+    uri: ${telegram-uri}
+
+custom:
+  table-data-initializer: false

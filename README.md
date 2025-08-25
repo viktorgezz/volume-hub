@@ -35,7 +35,15 @@ VolumeHub - это микросервисная система для анали
   - Расчет метрик
   - Архивация исторических данных
 
-### 4. Telegram Bot (tg_bot)
+### 4. Company info (company-info)
+- Управление данными о компаниях для использования в других сервисах
+- Хранение и предоставление информации о компаниях (название, тикер, FIGI)
+- Основные функции:
+  - Получение списка всех FIGI и компаний
+  - Поиск компании по FIGI или тикеру
+  - Добавление, обновление и удаление данных о компаниях
+
+### 5. Telegram Bot (tg_bot)
 - Оповещение пользователей об обнаруженных аномалиях
 - Интерактивное взаимодействие с пользователями
 - Настройка персональных уведомлений
@@ -43,12 +51,11 @@ VolumeHub - это микросервисная система для анали
 
 ## Технологический стек
 
-- Java 17
+- Java 17, 21
 - Spring Boot
 - Maven
 - RabbitMQ
 - PostgreSQL
-- H2 Database (in memory)
 - Docker & Docker Compose
 - Python (для Telegram бота)
 
@@ -59,21 +66,13 @@ VolumeHub - это микросервисная система для анали
 git clone https://github.com/yourusername/volumeHub.git
 ```
 
-2. Создайте файлы конфигурации из шаблонов:
-```bash
-cp api-gateway/src/main/resources/application.yml.origin api-gateway/src/main/resources/application.yml
-cp api-T-connector/src/main/resources/application.yml.origin api-T-connector/src/main/resources/application.yml
-cp definition-of-anomaly/src/main/resources/application.yml.origin definition-of-anomaly/src/main/resources/application.yml
-```
-
-3. Настройте параметры в файлах конфигурации:
+2. Настройте параметры в файлах конфигурации (.env):
 - Токен Tinkoff API
-- Параметры подключения к RabbitMQ
-- Настройки Telegram бота
+- Токен Telegram бота
 
-4. Запустите проект через Docker Compose:
+3. Запустите проект через Docker Compose:
 ```bash
-docker-compose -f docker-compose-project.yml up 
+docker-compose up 
 ```
 
 ## Структура проекта
@@ -83,13 +82,15 @@ volumeHub/
 ├── api-gateway/           # API Gateway сервис
 ├── api-T-connector/       # Сервис работы с Tinkoff API
 ├── definition-of-anomaly/ # Сервис анализа аномалий
+├── company-info/ # Сервис общих данных (справочник)
 ├── tg_bot/               # Telegram бот
-└── docker-compose-project.yml
+└── docker-compose.yml
 ```
 
 ## Мониторинг и метрики
 
 - Логирование реализовано с использованием SLF4J
+- Prometheus + grafana
 
 ## Демонстрация
 
