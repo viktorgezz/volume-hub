@@ -145,7 +145,7 @@ services:
       - RABBITMQ_TEMPLATE_ANOMALY_EXCHANGE=${RABBITMQ_TEMPLATE_ANOMALY_EXCHANGE}
       - RABBITMQ_TEMPLATE_ANOMALY_QUEUE=${RABBITMQ_TEMPLATE_ANOMALY_QUEUE}
       - RABBITMQ_TEMPLATE_ANOMALY_ROUTING_KEY=${RABBITMQ_TEMPLATE_ANOMALY_ROUTING_KEY}
-      - TELEGRAM_TOKEN=${API_TELEGRAM}
+      - TELEGRAM_TOKEN=${TOKEN_TELEGRAM}
       - LOG_LEVEL=${LOG_LEVEL:-INFO}
     volumes:
       - ./tg_bot/chat_ids.json:/app/chat_ids.json
@@ -179,7 +179,7 @@ services:
       - GF_SECURITY_ADMIN_USER=admin  # Имя администратора
       - GF_SECURITY_ADMIN_PASSWORD=strongpassword123
       - GF_AUTH_TOKEN_ROTATION_INTERVAL_MINUTES=30
-      - GF_SERVER_ROOT_URL=http://localhost:3000  # Яв
+      - GF_SERVER_ROOT_URL=http://localhost:3000
       - GF_DATABASE_TYPE=sqlite3
     depends_on:
       - prometheus
