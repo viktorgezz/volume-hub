@@ -1,4 +1,6 @@
-package ru.viktorgezz.definition_of_anomaly.company;
+package ru.viktorgezz.definition_of_anomaly.company.intf;
+
+import ru.viktorgezz.definition_of_anomaly.company.CompanyRsDto;
 
 import java.util.Optional;
 

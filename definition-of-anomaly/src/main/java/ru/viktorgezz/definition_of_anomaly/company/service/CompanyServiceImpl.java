@@ -1,10 +1,13 @@
-package ru.viktorgezz.definition_of_anomaly.company;
+package ru.viktorgezz.definition_of_anomaly.company.service;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import ru.viktorgezz.definition_of_anomaly.company.CompanyDao;
+import ru.viktorgezz.definition_of_anomaly.company.CompanyRsDto;
+import ru.viktorgezz.definition_of_anomaly.company.intf.CompanyApiClient;
 
 import java.util.List;
 

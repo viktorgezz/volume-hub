@@ -13,7 +13,7 @@ import ru.viktorgezz.api_T_connector.candle.CandleMessage;
 import ru.viktorgezz.api_T_connector.candle.service.interf.CandleStreamService;
 import ru.viktorgezz.api_T_connector.company.ClientFigi;
 import ru.viktorgezz.api_T_connector.rabbitmq.RabbitMQProducer;
-import ru.viktorgezz.api_T_connector.util.ConnectTApiInvest;
+import ru.viktorgezz.api_T_connector.ConnectTApiInvest;
 
 import java.util.function.Consumer;
 
@@ -53,7 +53,7 @@ public class CandleStreamServiceImpl implements CandleStreamService {
                             event -> {
                                 if (event.hasCandle()) {
                                     Candle candle = event.getCandle();
-                                    log.info("Latest minute candle for FIGI {}: Open={}, High={}, Low={}, Close={}, Volume={}, Time={}",
+                                    log.debug("Latest minute candle for FIGI {}: Open={}, High={}, Low={}, Close={}, Volume={}, Time={}",
                                             candle.getFigi(),
                                             MapperUtils.quotationToBigDecimal(candle.getOpen()),
                                             MapperUtils.quotationToBigDecimal(candle.getHigh()),
@@ -74,7 +74,7 @@ public class CandleStreamServiceImpl implements CandleStreamService {
                                     );
 
                                     producer.sendCandle(candleMessage);
-                                    log.info("Candle send. Figi: {}", candle.getFigi());
+                                    log.debug("Candle send. Figi: {}", candle.getFigi());
                                 }
 
                             },

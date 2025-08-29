@@ -14,23 +14,6 @@ services:
       - URI_DEFINE_ANOMALY=${DEFINE_ANOMALY_VOLUME_URL}
       - URI_COMPANY_INFO=${URL_GUIDE}
 
-  rabbit_mq_1:
-    image: rabbitmq:4-management
-    container_name: rabbit_mq_1
-    ports:
-      - "5672:5672"
-      - "15672:15672"
-    volumes:
-      - rabbitmq_data:/var/lib/rabbitmq
-    environment:
-      - RABBITMQ_DEFAULT_USER=${RABBITMQ_USERNAME}
-      - RABBITMQ_DEFAULT_PASS=${RABBITMQ_PASSWORD}
-    healthcheck:
-      test: [ "CMD", "rabbitmqctl", "status" ]
-      interval: 30s
-      timeout: 10s
-      retries: 5
-
   api-app:
     build:
       context: ./api-T-connector
@@ -69,15 +52,15 @@ services:
       - RABBITMQ_PORT=${RABBITMQ_PORT}
       - RABBITMQ_USERNAME=${RABBITMQ_USERNAME}
       - RABBITMQ_PASSWORD=${RABBITMQ_PASSWORD}
-      - RABBITMQ_TEMPLATE_EXCHANGE=${RABBITMQ_TEMPLATE_EXCHANGE}
       - RABBITMQ_TEMPLATE_QUEUE=${RABBITMQ_TEMPLATE_QUEUE}
-      - RABBITMQ_TEMPLATE_ROUTING_KEY=${RABBITMQ_TEMPLATE_ROUTING_KEY}
       - RABBITMQ_TEMPLATE_ANOMALY_EXCHANGE=${RABBITMQ_TEMPLATE_ANOMALY_EXCHANGE}
       - RABBITMQ_TEMPLATE_ANOMALY_QUEUE=${RABBITMQ_TEMPLATE_ANOMALY_QUEUE}
       - RABBITMQ_TEMPLATE_ANOMALY_ROUTING_KEY=${RABBITMQ_TEMPLATE_ANOMALY_ROUTING_KEY}
+      - RABBITMQ_QUEUE_UPD_MESS=${RABBITMQ_QUEUE_UPDATE_MESSAGE}
       - TELEGRAM_URI=${DEFINE_ANOMALY_TELEGRAM_URI}
       - API_APP_URL=${API_APP_URL}
       - GUIDE_URL=${URL_GUIDE}
+      - TABLE_DATA_INITIALIZER=${DEFINE_ANOMALY_TABLE_DATA_INITIALIZER}
     depends_on:
       db-anomaly:
         condition: service_healthy
@@ -94,8 +77,17 @@ services:
       - DATASOURCE_URL=${GUIDE_DATASOURCE_URL}
       - DATASOURCE_USERNAME=${POSTGRES_USER_INFO}
       - DATASOURCE_PASSWORD=${POSTGRES_PASSWORD_INFO}
+      - RABBITMQ_HOST=${RABBITMQ_HOST}
+      - RABBITMQ_PORT=${RABBITMQ_PORT}
+      - RABBITMQ_USERNAME=${RABBITMQ_USERNAME}
+      - RABBITMQ_PASSWORD=${RABBITMQ_PASSWORD}
+      - RABBITMQ_QUEUE_UPDATE_MESSAGE=${RABBITMQ_QUEUE_UPDATE_MESSAGE}
+      - RABBITMQ_EXCHANGE_UPDATE_MESSAGE=${RABBITMQ_EXCHANGE_UPDATE_MESSAGE}
+      - RABBITMQ_ROUTING_KEY_UPDATE_MESSAGE=${RABBITMQ_ROUTING_KEY_UPDATE_MESSAGE}
     depends_on:
       db-info:
+        condition: service_healthy
+      rabbit_mq_1:
         condition: service_healthy
 
   db-anomaly:
@@ -132,6 +124,23 @@ services:
       timeout: 5s
       retries: 5
 
+  rabbit_mq_1:
+    image: rabbitmq:4-management
+    container_name: rabbit_mq_1
+    ports:
+      - "5672:5672"
+      - "15672:15672"
+    volumes:
+      - rabbitmq_data:/var/lib/rabbitmq
+    environment:
+      - RABBITMQ_DEFAULT_USER=${RABBITMQ_USERNAME}
+      - RABBITMQ_DEFAULT_PASS=${RABBITMQ_PASSWORD}
+    healthcheck:
+      test: [ "CMD", "rabbitmqctl", "status" ]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+
   telegram-anomaly-bot:
     build:
       context: ./tg_bot
@@ -154,6 +163,7 @@ services:
       rabbit_mq_1:
         condition: service_healthy
 
+
   prometheus:
     image: prom/prometheus:v3.5.0
     container_name: prometheus
@@ -166,20 +176,20 @@ services:
       - '--web.console.libraries=/usr/share/prometheus/console_libraries'
       - '--web.console.templates=/usr/share/prometheus/consoles'
     ports:
-      - "9090:9090"  # UI Prometheus
+      - "9090:9090" # позже убрать порт
 
   grafana:
     image: grafana/grafana:12.1.0
     container_name: grafana
     volumes:
-      - grafana-data:/var/lib/grafana  # Хранение дашбордов
+      - grafana-data:/var/lib/grafana
     ports:
-      - "3000:3000"  # UI Grafana
+      - "3000:3000"
     environment:
-      - GF_SECURITY_ADMIN_USER=admin  # Имя администратора
-      - GF_SECURITY_ADMIN_PASSWORD=strongpassword123
+      - GF_SECURITY_ADMIN_USER=${GRAFANA_ADMIN_USER}
+      - GF_SECURITY_ADMIN_PASSWORD=${GRAFANA_SECURITY_ADMIN_PASSWORD}
       - GF_AUTH_TOKEN_ROTATION_INTERVAL_MINUTES=30
-      - GF_SERVER_ROOT_URL=http://localhost:3000
+      - GF_SERVER_ROOT_URL=${GRAFANA_SERVER_ROOT_URL}
       - GF_DATABASE_TYPE=sqlite3
     depends_on:
       - prometheus
@@ -189,8 +199,8 @@ services:
     container_name: postgres_exporter_anomaly
     environment:
       - DATA_SOURCE_NAME=postgresql://${POSTGRES_USER_ANOMALY}:${POSTGRES_PASSWORD_ANOMALY}@db-anomaly:5432/${POSTGRES_DB_ANOMALY}?sslmode=disable
-    ports:
-      - "9187:9187"
+    expose:
+      - "9187"
     depends_on:
       db-anomaly:
         condition: service_healthy
@@ -200,8 +210,8 @@ services:
     container_name: postgres_exporter_info
     environment:
       - DATA_SOURCE_NAME=postgresql://${POSTGRES_USER_INFO}:${POSTGRES_PASSWORD_INFO}@db-info:5432/${POSTGRES_DB_INFO}?sslmode=disable
-    ports:
-      - "9188:9187"
+    expose:
+      - "9187"
     depends_on:
       db-info:
         condition: service_healthy

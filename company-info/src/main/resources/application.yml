@@ -17,6 +17,15 @@ spring:
       url: ${datasource.url}
       username: ${datasource.username}
       password: ${datasource.password}
+  rabbitmq:
+    host: ${rabbitmq.host}
+    port: ${rabbitmq.port}
+    username: ${rabbitmq.username}
+    password: ${rabbitmq.password}
+    template:
+      queue: ${rabbitmq.queue.update.message}
+      exchange: ${rabbitmq.exchange.update.message}
+      routing-key: ${rabbitmq.queue.update.message}
 
 springdoc:
   api-docs:

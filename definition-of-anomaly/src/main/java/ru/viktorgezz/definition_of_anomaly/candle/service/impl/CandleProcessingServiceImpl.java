@@ -8,7 +8,7 @@ import org.springframework.transaction.annotation.Transactional;
 import ru.viktorgezz.definition_of_anomaly.candle.intf.CandleApiClient;
 import ru.viktorgezz.definition_of_anomaly.candle.service.intf.CandleService;
 import ru.viktorgezz.definition_of_anomaly.candle.dto.CandleDto;
-import ru.viktorgezz.definition_of_anomaly.company.CompanyService;
+import ru.viktorgezz.definition_of_anomaly.company.service.CompanyService;
 import ru.viktorgezz.definition_of_anomaly.candle.service.intf.CandleProcessingService;
 
 import java.util.List;
@@ -54,7 +54,7 @@ public class CandleProcessingServiceImpl implements CandleProcessingService {
                                         companyService.getIdCompanyByFigi(figi)
                                 );
 
-                                log.info(CANDLE_LIST_SIZE_FOR_FIGI, figi, candleDtos.size());
+                                log.debug(CANDLE_LIST_SIZE_FOR_FIGI, figi, candleDtos.size());
                             } catch (RuntimeException e) {
                                 log.error("Ошибка при обработке свече {}: {} ", figi, e.getMessage());
                             }

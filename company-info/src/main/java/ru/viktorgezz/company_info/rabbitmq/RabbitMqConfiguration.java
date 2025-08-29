@@ -1,10 +1,13 @@
-package ru.viktorgezz.api_T_connector.rabbitmq;
+package ru.viktorgezz.company_info.rabbitmq;
 
+import jakarta.annotation.PostConstruct;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.amqp.core.Binding;
 import org.springframework.amqp.core.BindingBuilder;
 import org.springframework.amqp.core.Queue;
 import org.springframework.amqp.core.TopicExchange;
 import org.springframework.amqp.rabbit.connection.CachingConnectionFactory;
+import org.springframework.amqp.rabbit.core.RabbitAdmin;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.amqp.support.converter.Jackson2JsonMessageConverter;
 import org.springframework.beans.factory.annotation.Value;
@@ -12,16 +15,17 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
 @Configuration
-public class RabbitMQConfig {
+@Slf4j
+public class RabbitMqConfiguration {
 
     @Value("${spring.rabbitmq.template.queue}")
-    private String queueName;
+    private String queueUpdMess;
 
     @Value("${spring.rabbitmq.template.exchange}")
-    private String exchangeName;
+    private String exchangeUpdMess;
 
     @Value("${spring.rabbitmq.template.routing-key}")
-    private String routingKey;
+    private String routingKeyUpdMess;
 
     @Value("${spring.rabbitmq.host}")
     private String host;
@@ -37,22 +41,22 @@ public class RabbitMQConfig {
 
     @Bean
     public Queue queue() {
-        return new Queue(queueName, false);
+        return new Queue(queueUpdMess, true);
     }
 
     @Bean
     public TopicExchange exchange() {
-        return new TopicExchange(exchangeName);
+        return new TopicExchange(exchangeUpdMess);
     }
 
     @Bean
-    public Binding binding(Queue queue, TopicExchange exchange) {
-        return BindingBuilder.bind(queue).to(exchange).with(routingKey);
+    public Binding binding(Queue queue, TopicExchange topicExchange) {
+        return BindingBuilder.bind(queue).to(topicExchange).with(routingKeyUpdMess);
     }
 
     @Bean
     public CachingConnectionFactory connectionFactory() {
-        CachingConnectionFactory connectionFactory =
+       CachingConnectionFactory connectionFactory =
                 new CachingConnectionFactory(host);
         connectionFactory.setUsername(username);
         connectionFactory.setPassword(password);
@@ -66,8 +70,8 @@ public class RabbitMQConfig {
     }
 
     @Bean
-    public RabbitTemplate rabbitTemplate() {
-        RabbitTemplate template = new RabbitTemplate(connectionFactory());
+    public RabbitTemplate rabbitTemplate(CachingConnectionFactory connectionFactory) {
+        RabbitTemplate template = new RabbitTemplate(connectionFactory);
         template.setMessageConverter(jsonMessageConverter());
         return template;
     }

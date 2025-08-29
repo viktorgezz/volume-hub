@@ -7,6 +7,8 @@ import ru.viktorgezz.company_info.company.intf.CompanyRepo;
 import ru.viktorgezz.company_info.company.intf.CompanyService;
 import ru.viktorgezz.company_info.exception.BusinessException;
 import ru.viktorgezz.company_info.exception.ErrorCode;
+import ru.viktorgezz.company_info.rabbitmq.CompanyMessage;
+import ru.viktorgezz.company_info.rabbitmq.ProducerUpdMess;
 
 import java.util.List;
 import java.util.Optional;
@@ -18,6 +20,7 @@ import java.util.stream.StreamSupport;
 public class CompanyServiceImpl implements CompanyService {
 
     private final CompanyRepo companyRepo;
+    private final ProducerUpdMess producerUpdMess;
 
     @Override
     public List<String> getAllFigis() {
@@ -74,6 +77,7 @@ public class CompanyServiceImpl implements CompanyService {
         if (updatedRows == 0) {
             throw new BusinessException(ErrorCode.COMPANY_NOT_FOUND, ticker);
         }
+        producerUpdMess.sendMessage(CompanyMessage.builder().lookupTicker(ticker).figi(figi).build());
     }
 
     @Transactional
@@ -83,14 +87,16 @@ public class CompanyServiceImpl implements CompanyService {
         if (updatedRows == 0) {
             throw new BusinessException(ErrorCode.COMPANY_NOT_FOUND, ticker);
         }
+        producerUpdMess.sendMessage(CompanyMessage.builder().lookupTicker(ticker).name(name).build());
     }
 
     @Transactional
     @Override
     public void updateTickerByTicker(String oldTicker, String newTicker) {
-        int updatedRows = companyRepo.updateTickerByTicker(newTicker, oldTicker);
+        int updatedRows = companyRepo.updateTickerByTicker(oldTicker, newTicker);
         if (updatedRows == 0) {
             throw new BusinessException(ErrorCode.COMPANY_NOT_FOUND, oldTicker);
         }
+        producerUpdMess.sendMessage(CompanyMessage.builder().lookupTicker(oldTicker).tickerUpdate(newTicker).build());
     }
 }

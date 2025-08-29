@@ -11,7 +11,7 @@ import ru.viktorgezz.api_T_connector.candle.CustomCandle;
 import ru.viktorgezz.api_T_connector.candle.service.interf.HistoricalCandleMarketService;
 import ru.viktorgezz.api_T_connector.company.ClientFigiImpl;
 import ru.viktorgezz.api_T_connector.exception.BusinessException;
-import ru.viktorgezz.api_T_connector.util.ConnectTApiInvest;
+import ru.viktorgezz.api_T_connector.ConnectTApiInvest;
 
 import java.math.BigDecimal;
 import java.sql.Timestamp;
@@ -54,18 +54,14 @@ public class HistoricalCandleMarketServiceImpl implements HistoricalCandleMarket
         return getLastTwoCandleByInterval(figi, THREE_DAY_IN_MINUTES, CANDLE_INTERVAL_DAY);
     }
 
-    public List<CustomCandle> getLastTwoMinuteCandle(String figi) {
-        return getLastTwoCandleByInterval(figi, THREE_MINUTES, CANDLE_INTERVAL_1_MIN);
-    }
-
     public List<CustomCandle> getMinuteCandlesForLastHourByFigi(
             final String figi) {
-        log.info(CANDLE_FETCH_MESSAGE, figi, ONE_HOUR_IN_MINUTES);
+        log.debug(CANDLE_FETCH_MESSAGE, figi, ONE_HOUR_IN_MINUTES);
         return fetchIntervalCandlesByFigiAndTimeAndInterval(figi, ONE_HOUR_IN_MINUTES, CANDLE_INTERVAL_1_MIN);
     }
 
     public Map<String, List<CustomCandle>> getMinuteCandlesForLastDayAllFigis() {
-        log.info(CANDLE_FETCH_MESSAGE, "Всех свечей", ONE_DAY_IN_MINUTES);
+        log.debug(CANDLE_FETCH_MESSAGE, "Всех свечей", ONE_DAY_IN_MINUTES);
         return shareService.fetchAllFigis()
                 .stream()
                 .collect(Collectors.toMap(

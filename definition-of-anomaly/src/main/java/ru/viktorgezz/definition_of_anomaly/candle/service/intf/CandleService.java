@@ -10,4 +10,6 @@ public interface CandleService {
     void saveCandles(List<CandleDto> candleDtos, long idCompany);
 
     void saveCandle(AbstractCandle candle, long idCompany);
+
+    void saveCandle(AbstractCandle candle, long idCompany, boolean isAnomaly);
 }

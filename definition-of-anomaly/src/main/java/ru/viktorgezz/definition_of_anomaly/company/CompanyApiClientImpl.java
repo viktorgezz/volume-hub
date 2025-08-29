@@ -6,6 +6,7 @@ import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.http.HttpMethod;
 import org.springframework.stereotype.Component;
 import org.springframework.web.client.RestTemplate;
+import ru.viktorgezz.definition_of_anomaly.company.intf.CompanyApiClient;
 import ru.viktorgezz.definition_of_anomaly.util.ResponseExtractorUtils;
 
 import java.util.Optional;

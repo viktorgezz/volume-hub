@@ -7,8 +7,9 @@ import org.springframework.stereotype.Component;
 import ru.viktorgezz.definition_of_anomaly.candle.intf.CandleApiClient;
 import ru.viktorgezz.definition_of_anomaly.candle.dto.CandleAnomalyDto;
 import ru.viktorgezz.definition_of_anomaly.candle.dto.CandleDto;
+import ru.viktorgezz.definition_of_anomaly.candle.model.AbstractCandle;
 import ru.viktorgezz.definition_of_anomaly.candle.model.CandleMessage;
-import ru.viktorgezz.definition_of_anomaly.company.CompanyService;
+import ru.viktorgezz.definition_of_anomaly.company.service.CompanyService;
 
 import java.math.BigDecimal;
 import java.math.RoundingMode;
@@ -34,10 +35,9 @@ public class ConverterCandle {
 
     public CandleAnomalyDto convertToCandleAnomalyDto(CandleMessage candle) {
         final String figi = candle.getFigi();
-        final int three_hours = 3 * 60 * 60 * 1000;
 
         try {
-            Timestamp time = new Timestamp(candle.getTime().getTime() + three_hours);
+            Timestamp time = changeTime(candle);
 
             CandleDto converterCandle = convertToCandleDto(candle);
 
@@ -45,6 +45,7 @@ public class ConverterCandle {
             List<CandleDto> lastTwoCandle = List.of(minuteCandlesForLastHour.getLast(), converterCandle);
             minuteCandlesForLastHour.addLast(converterCandle);
 
+            minuteCandlesForLastHour.forEach(c -> c.setTime(changeTime(c)));
             return new CandleAnomalyDto.Builder()
                     .setName(companyService.getNameCompanyByFigi(figi))
                     .setTicker(companyService.getTickerByFigi(figi))
@@ -90,5 +91,10 @@ public class ConverterCandle {
                 candleMessage.getVolume(),
                 candleMessage.getTime()
         );
+    }
+
+    private Timestamp changeTime(AbstractCandle candle) {
+        final int three_hours = 3 * 60 * 60 * 1000;
+        return new Timestamp(candle.getTime().getTime() + three_hours);
     }
 }

@@ -30,7 +30,8 @@ CREATE TABLE IF NOT EXISTS candle(
     open NUMERIC(20, 9) NOT NULL,
     close NUMERIC(20, 9) NOT NULL,
     high NUMERIC(20, 9) NOT NULL,
-    low NUMERIC(20, 9) NOT NULL
+    low NUMERIC(20, 9) NOT NULL,
+    is_anomaly BOOLEAN NOT NULL DEFAULT FALSE
 );
 
 CREATE UNIQUE INDEX IF NOT EXISTS candle_id_company_time_unique

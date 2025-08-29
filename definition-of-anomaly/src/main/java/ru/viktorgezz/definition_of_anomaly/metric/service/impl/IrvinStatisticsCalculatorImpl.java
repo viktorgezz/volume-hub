@@ -7,7 +7,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import ru.viktorgezz.definition_of_anomaly.candle.service.intf.CandleStatisticsService;
 import ru.viktorgezz.definition_of_anomaly.metric.service.intrf.IrvinStatisticsCalculator;
-import ru.viktorgezz.definition_of_anomaly.company.CompanyService;
+import ru.viktorgezz.definition_of_anomaly.company.service.CompanyService;
 import ru.viktorgezz.definition_of_anomaly.metric.model.Metric;
 import ru.viktorgezz.definition_of_anomaly.metric.model.MetricByIrvin;
 import ru.viktorgezz.definition_of_anomaly.metric.service.intrf.MetricService;
@@ -47,7 +47,7 @@ public class IrvinStatisticsCalculatorImpl implements IrvinStatisticsCalculator 
                             );
 
                             metricService.save(id, newMetric);
-                            log.info(COMPANY_STATS_BY_IRVIN_SAVED, id, newMetric.getStandardDeviation(), newMetric.getAverage(), newMetric.getCriticalValue());
+                            log.debug(COMPANY_STATS_BY_IRVIN_SAVED, id, newMetric.getStandardDeviation(), newMetric.getAverage(), newMetric.getCriticalValue());
                         }
                 );
     }

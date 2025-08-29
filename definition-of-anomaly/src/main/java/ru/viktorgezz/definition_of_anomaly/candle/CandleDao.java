@@ -78,6 +78,18 @@ public class CandleDao {
                 candle.getVolume(), candle.getTime());
     }
 
+    public void saveCandle(AbstractCandle candle, long idCompany, boolean isAnomaly) {
+        final String sql = String.format(
+                "INSERT INTO %s (id_company, open, close, high, low, volume, time, is_anomaly) " +
+                        "VALUES (?, ?, ?, ?, ?, ?, ?, ?) " +
+                        "ON CONFLICT (id_company, time) DO NOTHING",
+                NAME_TABLE_CANDLE);
+        jdbcTemplate.update(
+                sql,
+                idCompany, candle.getOpen(), candle.getClose(), candle.getHigh(), candle.getLow(),
+                candle.getVolume(), candle.getTime(), isAnomaly);
+    }
+
     public BigDecimal computeCriticalValue(Long idCompany) {
         final String sql = String.format("""
                     WITH num_of_entries AS (

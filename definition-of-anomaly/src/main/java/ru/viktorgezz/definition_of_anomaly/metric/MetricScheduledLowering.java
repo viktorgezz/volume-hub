@@ -3,7 +3,7 @@ package ru.viktorgezz.definition_of_anomaly.metric;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
-import ru.viktorgezz.definition_of_anomaly.company.CompanyService;
+import ru.viktorgezz.definition_of_anomaly.company.service.CompanyService;
 import ru.viktorgezz.definition_of_anomaly.metric.service.intrf.MetricDynamicService;
 
 @Component

@@ -1,4 +1,4 @@
-package ru.viktorgezz.api_T_connector.util;
+package ru.viktorgezz.api_T_connector;
 
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;

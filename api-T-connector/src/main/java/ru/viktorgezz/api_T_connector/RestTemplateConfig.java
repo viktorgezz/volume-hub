@@ -1,4 +1,4 @@
-package ru.viktorgezz.api_T_connector.util;
+package ru.viktorgezz.api_T_connector;
 
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;

@@ -1,4 +1,4 @@
-package ru.viktorgezz.definition_of_anomaly.company;
+package ru.viktorgezz.definition_of_anomaly.company.service;
 
 import java.util.List;
 

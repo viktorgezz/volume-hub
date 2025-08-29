@@ -31,4 +31,10 @@ public class CandleServiceImpl implements CandleService {
     public void saveCandle(AbstractCandle candle, long idCompany) {
         candleDao.saveCandle(candle, idCompany);
     }
+
+    @Override
+    @Transactional
+    public void saveCandle(AbstractCandle candle, long idCompany, boolean isAnomaly) {
+        candleDao.saveCandle(candle, idCompany, isAnomaly);
+    }
 }

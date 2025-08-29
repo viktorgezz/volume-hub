@@ -4,10 +4,9 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.amqp.rabbit.annotation.RabbitListener;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Component;
 import ru.viktorgezz.definition_of_anomaly.candle.model.CandleMessage;
-import ru.viktorgezz.definition_of_anomaly.candle.service.intf.CandleAnomalousService;
+import ru.viktorgezz.definition_of_anomaly.candle.service.intf.CandleAnomalyHandler;
 
 @Component
 public class CandleMinuteConsumer {
@@ -16,18 +15,18 @@ public class CandleMinuteConsumer {
 
     private static final String FIGI_AND_VOLUME_INFO = "figi: {}, volume: {}";
 
-    private final CandleAnomalousService anomalousCandle;
+    private final CandleAnomalyHandler anomalousCandle;
 
     @Autowired
     public CandleMinuteConsumer(
-            @Qualifier("proxyCandleAnomalousService") CandleAnomalousService anomalousCandle
+            CandleAnomalyHandler anomalousCandle
             ) {
         this.anomalousCandle = anomalousCandle;
     }
 
     @RabbitListener(queues = "${spring.rabbitmq.template.queue}")
     public void receiveMinuteCandles(CandleMessage candleMessage) {
-        log.info(FIGI_AND_VOLUME_INFO, candleMessage.getFigi(), candleMessage.getVolume());
+        log.debug(FIGI_AND_VOLUME_INFO, candleMessage.getFigi(), candleMessage.getVolume());
         anomalousCandle.foundAnomalyCandle(candleMessage);
     }
 }

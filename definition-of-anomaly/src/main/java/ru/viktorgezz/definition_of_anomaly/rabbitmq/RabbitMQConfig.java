@@ -11,17 +11,14 @@ import org.springframework.context.annotation.Configuration;
 @Configuration
 public class RabbitMQConfig {
 
-    @Value("${spring.rabbitmq.template.queue}")
-    private String queueName;
-
-    @Value("${spring.rabbitmq.template.exchange}")
-    private String exchangeName;
-
-    @Value("${spring.rabbitmq.template.routing-key}")
-    private String routingKey;
-
     @Value("${spring.rabbitmq.template.anomaly.queue}")
     private String anomalyQueueName;
+
+    @Value("${spring.rabbitmq.template.company.queue}")
+    private String updateQueue;
+
+    @Value("${spring.rabbitmq.template.queue}")
+    private String queueMinute;
 
     @Value("${spring.rabbitmq.template.anomaly.exchange}")
     private String anomalyExchangeName;
@@ -38,22 +35,17 @@ public class RabbitMQConfig {
     @Value("${spring.rabbitmq.password}")
     private String password;
 
-    @Bean
-    public Queue queue() {
-        return new Queue(queueName, false);
+    @Bean("queueMinute")
+    public Queue queueMinute() {
+        return new Queue(queueMinute, false);
     }
 
-    @Bean
-    public TopicExchange exchange() {
-        return new TopicExchange(exchangeName);
+    @Bean("queueUpdate")
+    public Queue queueUpdate() {
+        return new Queue(updateQueue, true);
     }
 
-    @Bean
-    public Binding binding() {
-        return BindingBuilder.bind(queue()).to(exchange()).with(routingKey);
-    }
-
-    @Bean
+    @Bean("anomalyQueue")
     public Queue queueAnomaly() {
         return new Queue(anomalyQueueName, false);
     }

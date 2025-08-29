@@ -20,12 +20,13 @@ spring:
     password: ${rabbitmq.password}
     template:
       queue: ${rabbitmq.template.queue}
-      exchange: ${rabbitmq.template.exchange}
-      routing-key: ${rabbitmq.template.routing.key}
       anomaly:
         queue: ${rabbitmq.template.anomaly.queue}
         exchange: ${rabbitmq.template.anomaly.exchange}
         routing-key: ${rabbitmq.template.anomaly.routing.key}
+      company:
+        queue: ${rabbitmq.queue.upd.mess}
+
 
 
 management:
@@ -52,4 +53,4 @@ service:
     uri: ${telegram-uri}
 
 custom:
-  table-data-initializer: false
+  table-data-initializer: ${table.data.initializer}
