@@ -12,6 +12,9 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v3
 
+      - name: Pull latest changes
+        run: git pull origin main
+
       - name: Stop existing services
         run: |
           cd 
