@@ -42,7 +42,7 @@ public class ConverterCandle {
             CandleDto converterCandle = convertToCandleDto(candle);
 
             LinkedHashSet<CandleDto> minuteCandlesForLastHour = new LinkedHashSet<>(candleApiClient.fetchMinuteCandlesForLastHour(figi));
-            List<CandleDto> lastTwoCandle = List.of(minuteCandlesForLastHour.getLast(), converterCandle);
+            List<CandleDto> lastTwoCandleMin = List.of(converterCandle, minuteCandlesForLastHour.getLast());
             minuteCandlesForLastHour.addLast(converterCandle);
 
             minuteCandlesForLastHour.forEach(c -> c.setTime(changeTime(c)));
@@ -57,7 +57,7 @@ public class ConverterCandle {
                             )
                     )
                     .setPriceMinuteChangeAsPercentage(
-                            calculatePriceChangeAsPercentage(lastTwoCandle)
+                            calculatePriceChangeAsPercentage(lastTwoCandleMin)
                     )
                     .setTime(time)
                     .setCandlesLastHour(minuteCandlesForLastHour)
@@ -69,8 +69,8 @@ public class ConverterCandle {
     }
 
     private BigDecimal calculatePriceChangeAsPercentage(List<CandleDto> candles) {
-        final BigDecimal priceCloseCurr = candles.getLast().getClose();
-        final BigDecimal priceCloseLast = candles.getFirst().getClose();
+        final BigDecimal priceCloseCurr = candles.getFirst().getClose();
+        final BigDecimal priceCloseLast = candles.getLast().getClose();
         final BigDecimal priceChange = priceCloseCurr.subtract(priceCloseLast);
 
         log.info("closeCurr: {}, closeLastDay: {}, change: {}",

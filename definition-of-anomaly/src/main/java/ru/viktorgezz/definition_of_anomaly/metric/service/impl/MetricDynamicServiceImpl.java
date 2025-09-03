@@ -18,8 +18,8 @@ import java.util.Optional;
 @Service
 public class MetricDynamicServiceImpl implements MetricDynamicService {
 
-    private final static BigDecimal VALUE_DOWNGRADE = new BigDecimal("-0.1");
-    private final static BigDecimal VALUE_UPGRADE = new BigDecimal("0.1");
+    private final static BigDecimal VALUE_DOWNGRADE = new BigDecimal("-1");
+    private final static BigDecimal VALUE_UPGRADE = new BigDecimal("1");
     private final static long MILLIS_IN_24_HOURS = 24 * 60 * 60 * 1000L;
     private static final Logger log = LoggerFactory.getLogger(MetricDynamicServiceImpl.class);
 
